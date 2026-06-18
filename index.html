@@ -930,7 +930,9 @@ function calcResult() {
   });
 
   var dim1=(scores.dim1>=0?'E':'I'),dim2=(scores.dim2>=0?'B':'T'),dim3=(scores.dim3>=0?'C':'F'),dim4=(scores.dim4>=0?'P':'R'); var code=dim1+dim2+dim3+dim4;
-  var type = TYPES[code] || TYPES[dim1+dim3+dim2+dim4];
+  // 适配 TYPES 数据库的字母编码（dim2: T→F, dim3: F→T）
+  var tKey=dim1+(dim2==='B'?'B':'F')+(dim3==='C'?'C':'T')+dim4;
+  var type = TYPES[code] || TYPES[tKey];
   if (!type) { showToast('类型未找到: '+code); return; }
 
   currentResultCode = code;
