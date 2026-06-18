@@ -2,782 +2,1157 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎾 网球人格鉴定局 — 你到底是什么球场奇葩？</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🎾 网球人格鉴定局</title>
 <style>
   :root {
+    --safe-top: env(safe-area-inset-top, 20px);
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
     --green: #2ecc71; --orange: #e67e22; --blue: #3498db; --red: #e74c3c;
-    --purple: #9b59b6; --yellow: #f1c40f; --pink: #e91e63; --teal: #1abc9c;
-    --bg: #fef9e7; --card: #ffffff; --text: #2c3e50; --muted: #95a5a6;
-    --dim1: #e74c3c; --dim2: #e67e22; --dim3: #2ecc71; --dim4: #3498db;
+    --purple: #9b59b6; --yellow: #f1c40f; --teal: #1abc9c;
+    --bg: #0f0f1a; --card: #1a1a2e; --card2: #16213e;
+    --text: #e8e8e8; --muted: #888;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 16px; height: 100%; overflow: hidden; }
   body {
-    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
-    background: linear-gradient(180deg, #e8f8f5 0%, #fef9e7 30%, #fdebd0 70%, #e8f8f5 100%);
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
     color: var(--text);
-    line-height: 1.6;
-  }
-  body::before {
-    content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: 0;
-    background: radial-gradient(circle at 15% 20%, rgba(231,76,60,0.04) 0%, transparent 50%),
-                radial-gradient(circle at 85% 75%, rgba(46,204,113,0.04) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(241,196,15,0.03) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
+    height: 100%;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
   }
 
-  .container { max-width: 780px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
-
-  /* --- 头部 --- */
-  .hero { text-align: center; padding: 30px 20px 20px; }
-  .hero .ball { font-size: 72px; display: block; animation: bounceHero 1.5s ease-in-out infinite; }
-  @keyframes bounceHero {
-    0%,100% { transform: translateY(0) rotate(0deg); }
-    30% { transform: translateY(-24px) rotate(20deg); }
-    60% { transform: translateY(0) rotate(-15deg); }
+  /* ===== 全局动画 ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .hero h1 {
-    font-size: 2em;
-    background: linear-gradient(135deg, var(--red), var(--orange), var(--green), var(--blue));
-    background-size: 300% 300%;
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientShift 4s ease infinite;
-    margin: 10px 0;
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
   }
-  @keyframes gradientShift {
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    30% { transform: translateY(-12px); }
+    60% { transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes gradientBG {
     0%,100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
   }
-  .hero .tagline { color: var(--muted); font-size: 1em; }
+  @keyframes float {
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-8px) rotate(3deg); }
+    75% { transform: translateY(6px) rotate(-2deg); }
+  }
+  @keyframes confettiDrop {
+    0% { opacity: 1; transform: translateY(-60px) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.2); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 
-  /* --- 卡片 --- */
-  .card {
-    background: var(--card); border-radius: 20px; padding: 28px 24px;
-    margin: 14px 0; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    border: 1px solid rgba(0,0,0,0.04);
+  /* ===== 主容器 ===== */
+  #app {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 顶部导航条 ===== */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--safe-top) + 8px) 20px 12px;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .top-bar-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--green), var(--teal), var(--yellow));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientBG 3s ease infinite;
+  }
+
+  /* ===== 页面容器 ===== */
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 20px 40px;
+    display: none;
+  }
+  .page.active { display: block; animation: fadeInUp 0.4s ease; }
+
+  /* 隐藏滚动条但可滚动 */
+  .page::-webkit-scrollbar { display: none; }
+
+  /* ===== 首页 ===== */
+  .intro-hero {
+    text-align: center;
+    padding: 20px 0 30px;
+  }
+  .intro-ball {
+    font-size: 80px;
+    display: block;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 8px 16px rgba(241,196,15,0.4));
+  }
+  .intro-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 12px 0 6px;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #2ecc71, #f1c40f, #e67e22, #e74c3c);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientBG 4s ease infinite;
+  }
+  .intro-sub { font-size: 15px; color: var(--muted); }
+  .intro-joke { font-size: 12px; color: #666; margin-top: 4px; }
+
+  .dim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .dim-item {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .dim-item:active { transform: scale(0.97); border-color: rgba(241,196,15,0.3); }
+  .dim-emoji { font-size: 36px; display: block; }
+  .dim-label { font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--text); }
+  .dim-pair { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .info-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .info-card p { font-size: 14px; color: #bbb; line-height: 2; }
+  .info-card .highlight { color: var(--yellow); font-weight: 700; }
+
+  /* ===== 按钮 ===== */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    height: 54px;
+    border-radius: 27px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: linear-gradient(135deg, #e67e22, #e74c3c);
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(231,76,60,0.35);
+    margin-top: 20px;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2s infinite;
+  }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.12);
+    margin-top: 12px;
+  }
+
+  /* ===== 答题页 ===== */
+  .test-page-inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .progress-wrap {
+    padding: 6px 0 16px;
+    flex-shrink: 0;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--teal));
+    transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .q-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .q-badge {
+    display: inline-block;
+    background: rgba(241,196,15,0.15);
+    color: var(--yellow);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    align-self: flex-start;
+  }
+  .q-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    color: #fff;
+  }
+
+  .opts-list { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .opt:active { background: rgba(46,204,113,0.08); border-color: rgba(46,204,113,0.3); }
+  .opt.selected {
+    background: rgba(46,204,113,0.12) !important;
+    border-color: var(--green) !important;
+    box-shadow: 0 0 20px rgba(46,204,113,0.15);
+  }
+  .opt-emoji {
+    font-size: 28px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .opt-text {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .opt-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .opt.selected .opt-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  /* 底部导航 */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:active { background: rgba(255,255,255,0.1); }
+  .nav-btn:disabled { opacity: 0.3; }
+  .nav-btn.next-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(46,204,113,0.3);
+  }
+  .nav-btn.next-btn:disabled { opacity: 0.4; }
+
+  .nav-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
     transition: all 0.3s;
   }
+  .dot.done { background: var(--green); }
+  .dot.current { background: var(--yellow); transform: scale(1.8); }
 
-  /* --- 介绍页 --- */
-  .dim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
-  @media (max-width: 600px) { .dim-grid { grid-template-columns: repeat(2, 1fr); } }
-  .dim-item { text-align: center; padding: 14px 8px; border-radius: 14px; background: #f8f9fa; transition: transform 0.2s; }
-  .dim-item:hover { transform: translateY(-3px); }
-  .dim-item .di-emoji { font-size: 2em; display: block; }
-  .dim-item .di-label { font-size: 0.85em; color: #555; margin-top: 4px; font-weight: 600; }
-  .dim-item .di-pair { font-size: 0.75em; color: #999; margin-top: 2px; }
-
-  .btn {
-    display: inline-block; padding: 14px 36px; border: none; border-radius: 50px;
-    font-size: 1.05em; font-weight: 700; cursor: pointer; transition: all 0.25s;
-    font-family: inherit; letter-spacing: 0.5px;
-  }
-  .btn-go {
-    background: linear-gradient(135deg, var(--orange), var(--red));
-    color: #fff; box-shadow: 0 6px 20px rgba(231,76,60,0.35);
-    font-size: 1.2em; padding: 16px 50px;
-  }
-  .btn-go:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(231,76,60,0.45); }
-  .btn-nav {
-    background: #fff; color: var(--text); border: 2px solid #ddd;
-  }
-  .btn-nav:hover { border-color: var(--blue); color: var(--blue); }
-  .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
-  .btn-restart {
-    display: block; margin: 30px auto 60px; background: linear-gradient(135deg, var(--blue), var(--purple));
-    color: #fff; box-shadow: 0 6px 20px rgba(52,152,219,0.3);
-  }
-
-  /* --- 进度条 --- */
-  .progress-wrap { margin: 0 0 20px; }
-  .progress-label { display: flex; justify-content: space-between; font-size: 0.85em; color: #888; margin-bottom: 6px; }
-  .progress-track { height: 10px; border-radius: 5px; background: #eee; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--green), var(--teal)); transition: width 0.4s ease; }
-
-  /* --- 问题区域 --- */
-  .q-slide { display: none; animation: slideUp 0.4s ease; }
-  .q-slide.active { display: block; }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-
-  .q-badge { display: inline-block; background: var(--yellow); color: #333; font-weight: 700; padding: 5px 16px; border-radius: 20px; font-size: 0.8em; margin-bottom: 10px; }
-  .q-title { font-size: 1.25em; font-weight: 700; margin-bottom: 18px; line-height: 1.5; }
-
-  .opts { display: flex; flex-direction: column; gap: 10px; }
-  .opt-btn {
-    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
-    border: 2px solid #e8e8e8; border-radius: 14px; background: #fafafa;
-    cursor: pointer; transition: all 0.2s; text-align: left; font-family: inherit;
-    font-size: 0.95em; color: var(--text);
-  }
-  .opt-btn:hover { border-color: var(--teal); background: #e8f8f5; transform: translateX(3px); }
-  .opt-btn.selected { border-color: var(--teal); background: #d5f5e3; font-weight: 600; box-shadow: 0 2px 12px rgba(26,188,156,0.15); }
-  .opt-emoji { font-size: 1.8em; flex-shrink: 0; width: 40px; text-align: center; }
-  .opt-tag { display: inline-block; background: #eee; color: #888; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; margin-left: 6px; font-weight: 400; }
-
-  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 10px; }
-  .q-dots { display: flex; gap: 4px; }
-  .q-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: all 0.3s; }
-  .q-dot.done { background: var(--green); }
-  .q-dot.current { background: var(--orange); transform: scale(1.5); }
-
-  /* --- 结果页 --- */
-  .result-wrap { display: none; }
-  .result-wrap.show { display: block; animation: slideUp 0.6s ease; }
-
+  /* ===== 结果页 ===== */
   .result-hero {
-    text-align: center; padding: 36px 20px; border-radius: 20px;
-    background: linear-gradient(135deg, #2c3e50, #34495e);
-    color: #fff; margin-bottom: 20px;
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 20px;
+    background: linear-gradient(160deg, #1a1a2e, #16213e);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 16px;
   }
-  .result-hero .r-emoji { font-size: 80px; display: block; }
-  .result-hero .r-type { font-size: 2.6em; font-weight: 900; letter-spacing: 2px; margin: 8px 0; }
-  .result-hero .r-name { font-size: 1.6em; font-weight: 700; color: var(--yellow); }
-  .result-hero .r-tagline { font-size: 0.9em; color: #bbb; margin-top: 4px; font-style: italic; }
-
-  .dim-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 500px) { .dim-bars { grid-template-columns: 1fr; } }
-  .dim-bar-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-  .dim-bar-card .dbc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .dim-bar-card .dbc-label { font-size: 0.85em; font-weight: 700; }
-  .dim-bar-card .dbc-result { font-size: 0.8em; color: #888; }
-  .dim-bar-card .dbc-bar { height: 8px; border-radius: 4px; background: #eee; overflow: hidden; }
-  .dim-bar-card .dbc-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.16, 0.68, 0.18, 1.02); }
-
-  .desc-card { background: #fffdf5; border-radius: 14px; padding: 20px 22px; border: 2px dashed var(--yellow); margin-top: 16px; }
-  .desc-card h3 { color: var(--orange); margin-bottom: 8px; }
-  .desc-card p { line-height: 1.8; }
-
-  .metaphor-card { background: #f0f4ff; border-radius: 14px; padding: 18px 22px; margin-top: 12px; text-align: center; }
-  .metaphor-card .m-row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
-  .metaphor-card .m-item { text-align: center; }
-  .metaphor-card .m-item .m-icon { font-size: 2.2em; }
-  .metaphor-card .m-item .m-label { font-size: 0.8em; color: #888; }
-
-  .hidden { display: none !important; }
-
-  /* 装饰小球 */
-  .float-ball {
-    position: fixed; font-size: 28px; pointer-events: none; z-index: 0;
-    animation: floatAround 8s ease-in-out infinite; opacity: 0.5;
+  .r-emoji { font-size: 80px; display: block; animation: pulse 2s ease-in-out infinite; }
+  .r-code {
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    margin: 6px 0;
+    display: block;
   }
-  @keyframes floatAround {
-    0%,100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(30px, -40px) rotate(90deg); }
-    50% { transform: translate(-20px, -80px) rotate(180deg); }
-    75% { transform: translate(-40px, -30px) rotate(270deg); }
+  .r-name {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--yellow);
+    display: block;
+  }
+  .r-tagline {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 4px;
+    display: block;
   }
 
-  .confetti { position: fixed; pointer-events: none; z-index: 999; font-size: 36px; animation: confettiFall 3s ease-out forwards; }
-  @keyframes confettiFall {
-    0% { opacity: 1; transform: translateY(-100px) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translateY(110vh) rotate(720deg) scale(0.3); }
+  .dim-bars { display: flex; flex-direction: column; gap: 10px; }
+  .dim-bar-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--green);
+  }
+  .dim-bar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .dim-bar-label { font-size: 14px; font-weight: 700; }
+  .dim-bar-result { font-size: 13px; font-weight: 600; }
+  .dim-bar-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+  .dim-bar-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .dim-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s cubic-bezier(0.16, 0.68, 0.18, 1.02);
+  }
+
+  .desc-box {
+    background: rgba(241,196,15,0.06);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    border: 1px dashed rgba(241,196,15,0.2);
+  }
+  .desc-box h4 { font-size: 16px; color: var(--yellow); margin-bottom: 8px; }
+  .desc-box p { font-size: 14px; line-height: 1.8; color: #ccc; white-space: pre-line; }
+
+  .metaphor-row {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    padding: 10px 0;
+  }
+  .metaphor-item { flex: 1; }
+  .metaphor-item .m-emoji { font-size: 40px; display: block; }
+  .metaphor-item .m-label { font-size: 15px; font-weight: 700; margin: 4px 0; }
+  .metaphor-item .m-note { font-size: 11px; color: var(--muted); }
+
+
+  .share-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1a1a2e; border-radius: 20px 20px 0 0;
+    padding: 28px 20px 40px; z-index: 200; animation: fadeInUp 0.3s ease;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+  }
+  .share-panel.hidden { display: none; }
+  .share-panel-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 20px; color: #fff; }
+  .share-options { display: flex; justify-content: space-around; gap: 12px; }
+  .share-opt {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 16px 10px; border-radius: 16px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); cursor: pointer; flex: 1;
+  }
+  .share-opt:active { background: rgba(255,255,255,0.12); }
+  .share-opt-icon { font-size: 36px; }
+  .share-opt-label { font-size: 13px; color: #ccc; font-weight: 600; }
+  .share-opt-sub { font-size: 11px; color: #888; }
+  .share-link-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+  .share-link-input {
+    flex: 1; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12); color: #aaa; font-size: 13px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .share-copy-btn {
+    padding: 10px 18px; border-radius: 10px; background: var(--green);
+    color: #fff; font-weight: 700; font-size: 13px; border: none; cursor: pointer;
+  }
+  .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+  .share-overlay.hidden { display: none; }
+
+  .celeb-box {
+    text-align: center;
+    padding: 14px;
+    background: var(--card);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 10px 0;
+  }
+  .r-role {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f39c12;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  .star-box { }
+  .star-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    margin: 10px 0;
+  }
+  .star-flag { font-size: 40px; flex-shrink: 0; }
+  .star-info { display: flex; flex-direction: column; gap: 4px; }
+  .star-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .star-reason { font-size: 13px; color: #aaa; line-height: 1.5; }
+  .star-others { font-size: 12px; color: #666; margin-top: 6px; text-align: center; }
+  .match-box { }
+  .match-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .match-row:last-child { border-bottom: none; }
+  .match-badge { font-size: 24px; flex-shrink: 0; width: 32px; text-align: center; }
+  .match-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .match-role { font-size: 11px; color: var(--yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .match-code { font-size: 14px; font-weight: 700; color: #fff; }
+  .match-reason { font-size: 12px; color: #888; line-height: 1.4; }
+  .match-score {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--green);
+    flex-shrink: 0;
+    min-width: 45px;
+    text-align: right;
+  }
+
+  /* 分享区域 */
+  .share-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0 40px;
+  }
+
+  /* ===== 海报弹窗 ===== */
+  .poster-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+  .poster-overlay.hidden { display: none; }
+  .poster-close {
+    position: absolute;
+    top: max(20px, var(--safe-top));
+    right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .poster-card {
+    width: 300px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  .poster-card canvas { display: block; width: 100%; height: auto; }
+  .poster-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .poster-actions .btn { width: 280px; height: 48px; font-size: 16px; }
+  .poster-tip { font-size: 12px; color: #666; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    z-index: 200;
+    animation: fadeIn 0.2s ease;
+    pointer-events: none;
+  }
+  .toast.hidden { display: none; }
+
+  /* ===== 撒花 ===== */
+  .confetti-el {
+    position: fixed;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 150;
+    animation: confettiDrop 2.5s ease-out forwards;
+  }
+
+  /* ===== 背景粒子 ===== */
+  .bg-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(46,204,113,0.06);
+    animation: float 7s ease-in-out infinite;
   }
 </style>
 </head>
 <body>
 
-<div class="float-ball" style="top:8%;left:5%;animation-delay:0s;">🎾</div>
-<div class="float-ball" style="top:20%;right:6%;animation-delay:2.5s;">🎾</div>
-<div class="float-ball" style="bottom:15%;left:7%;animation-delay:5s;">🎾</div>
-
-<div class="container">
-
-  <!-- ==================== 介绍页 ==================== -->
-  <div id="introPage">
-    <div class="hero">
-      <span class="ball">🎾</span>
-      <h1>网球人格鉴定局</h1>
-      <p class="tagline">🔬 专业鉴定你在球场上的真实面目 —— 不保证科学，但保证好笑</p>
-    </div>
-
-    <div class="card" style="text-align:center;">
-      <div class="dim-grid">
-        <div class="dim-item">
-          <span class="di-emoji">🎉</span>
-          <span class="di-label">社交模式</span>
-          <span class="di-pair">组局狂魔 vs 独自美丽</span>
-        </div>
-        <div class="dim-item">
-          <span class="di-emoji">⚔️</span>
-          <span class="di-label">战斗风格</span>
-          <span class="di-pair">暴力输出 vs 优雅艺术</span>
-        </div>
-        <div class="dim-item">
-          <span class="di-emoji">🏆</span>
-          <span class="di-label">胜负执念</span>
-          <span class="di-pair">胜负欲爆棚 vs 佛系养生</span>
-        </div>
-        <div class="dim-item">
-          <span class="di-emoji">📋</span>
-          <span class="di-label">训练模式</span>
-          <span class="di-pair">计划狂魔 vs 随缘玩家</span>
-        </div>
-      </div>
-      <p style="color:#888; margin:10px 0;">
-        📝 20道灵魂拷问 · ⏱ 约3分钟 · 🎭 16种球场奇葩人格<br>
-        <small>每道题四个选项，请凭第一直觉作答，思前想后就不准了！</small>
-      </p>
-      <button class="btn btn-go" onclick="start()">🔪 开始解剖自己</button>
-    </div>
+<div id="app">
+  <!-- 顶部条 -->
+  <div class="top-bar" id="topBar">
+    <span class="top-bar-title">🎾 网球人格鉴定局</span>
   </div>
 
-  <!-- ==================== 测试页 ==================== -->
-  <div id="testPage" class="hidden">
-    <div class="card">
+  <!-- 背景粒子 -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- ===== 首页 ===== -->
+  <div class="page active" id="introPage">
+    <div class="intro-hero">
+      <span class="intro-ball">🎾</span>
+      <h1 class="intro-title">网球人格鉴定局</h1>
+      <p class="intro-sub">🔬 专业鉴定你在球场上的真实面目</p>
+      <p class="intro-joke">不保证科学，但保证好笑</p>
+    </div>
+
+    <div class="dim-grid">
+      <div class="dim-item"><span class="dim-emoji">🎉</span><span class="dim-label">社交模式</span><span class="dim-pair">组局狂魔 vs 独自美丽</span></div>
+      <div class="dim-item"><span class="dim-emoji">⚔️</span><span class="dim-label">战斗风格</span><span class="dim-pair">暴力输出 vs 优雅艺术</span></div>
+      <div class="dim-item"><span class="dim-emoji">🏆</span><span class="dim-label">胜负执念</span><span class="dim-pair">冠军癌晚期 vs 佛系养生</span></div>
+      <div class="dim-item"><span class="dim-emoji">📋</span><span class="dim-label">训练模式</span><span class="dim-pair">计划狂魔 vs 随缘玩家</span></div>
+    </div>
+
+    <div class="info-card">
+      <p>📝 <span class="highlight">20道</span>灵魂拷问 · ⏱ 约<span class="highlight">3分钟</span></p>
+      <p>🎭 <span class="highlight">16种</span>球场奇葩人格</p>
+      <p>⚔️ 武器 · 🦁 动物 · 🌤️ 天气 比喻</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="startTest()">🔪 开始解剖自己</button>
+    <button class="btn btn-secondary" id="shareIntroBtn" onclick="shareIntro()">📤 邀请球友来测</button>
+  </div>
+
+  <!-- ===== 测试页 ===== -->
+  <div class="page" id="testPage">
+    <div class="test-page-inner">
       <div class="progress-wrap">
-        <div class="progress-label"><span id="progText">第 1/20 题</span><span id="progPct">5%</span></div>
+        <div class="progress-info"><span id="progLabel">第 1/20 题</span><span id="progPct">5%</span></div>
         <div class="progress-track"><div class="progress-fill" id="progFill" style="width:5%"></div></div>
       </div>
-      <div id="qContainer"></div>
+      <div class="q-card" id="qCard"></div>
       <div class="nav-row">
-        <button class="btn btn-nav" id="prevBtn" onclick="prev()">⬅ 上一题</button>
-        <div class="q-dots" id="qDots"></div>
-        <button class="btn btn-nav" id="nextBtn" onclick="next()" disabled>下一题 ➡</button>
+        <button class="nav-btn" id="prevBtn" onclick="prevQ()" disabled>← 上一题</button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn next-btn" id="nextBtn" onclick="nextQ()" disabled>下一题 →</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 结果页 ==================== -->
-  <div id="resultPage" class="hidden">
-    <div class="result-wrap" id="resultWrap"></div>
-    <button class="btn btn-restart" onclick="restart()">🔄 再测一次！（结果会变吗？）</button>
+  <!-- ===== 结果页 ===== -->
+  <div class="page" id="resultPage">
+    <div id="resultContent"></div>
+    <div class="share-section">
+      <button class="btn btn-primary" onclick="showPoster()">📸 生成分享卡片</button>
+      <button class="btn btn-secondary" id="shareResultBtn" onclick="shareResult()">📤 分享给球友</button>
+      <button class="btn btn-secondary" onclick="restart()">🔄 再测一次</button>
+    </div>
   </div>
 
+  <!-- ===== 海报弹窗 ===== -->
+  <div class="poster-overlay hidden" id="posterOverlay" onclick="hidePoster(event)">
+    <span class="poster-close" onclick="hidePoster()">✕</span>
+    <div class="poster-card" id="posterCard">
+      <canvas id="posterCanvas" width="600" height="860"></canvas>
+    </div>
+    <div class="poster-actions">
+      <button class="btn btn-primary" onclick="savePoster()">💾 保存图片</button>
+      <span class="poster-tip">长按卡片也可保存 · 发朋友圈必备</span>
+    </div>
+  </div>
 </div>
 
 <script>
-// ===================== 数据 =====================
+// ==================== 数据 ====================
+const DIMS = [{"id":"dim1","name":"社交模式","l":"组局狂魔(E)","r":"独自美丽(I)","color":"#e74c3c","icon":"🎉"},{"id":"dim2","name":"战斗风格","l":"暴力输出(B)","r":"优雅艺术(T)","color":"#e67e22","icon":"⚔️"},{"id":"dim3","name":"胜负执念","l":"冠军癌晚期(C)","r":"佛系养生(F)","color":"#2ecc71","icon":"🏆"},{"id":"dim4","name":"训练模式","l":"计划狂魔(P)","r":"随缘玩家(R)","color":"#3498db","icon":"📋"}];
 
-const dims = [
-  { id: 'dim1', name: '社交模式', left: 'E', right: 'I',
-    leftName: '组局狂魔（E）', rightName: '独自美丽（I）',
-    lDesc: '球场上到处是你的熟人，群里@全员的那个人就是你', rDesc: '一个人来，一个人打，一个人走，安静且高效',
-    color: '#e74c3c' },
-  { id: 'dim2', name: '战斗风格', left: 'B', right: 'T',
-    leftName: '暴力输出（B）', rightName: '优雅艺术（T）',
-    lDesc: '每一拍都在和球有仇，大力出奇迹是你的座右铭', rDesc: '旋转、落点、节奏变化，网球在你手里是一门艺术',
-    color: '#e67e22' },
-  { id: 'dim3', name: '胜负执念', left: 'C', right: 'F',
-    leftName: '冠军癌晚期（C）', rightName: '佛系养生（F）',
-    lDesc: '输球能让你难受三天，记分牌比心跳还重要', rDesc: '输赢随缘，出汗就行，打完球去撸串才是正事',
-    color: '#2ecc71' },
-  { id: 'dim4', name: '训练模式', left: 'P', right: 'R',
-    leftName: '计划狂魔（P）', rightName: '随缘玩家（R）',
-    lDesc: '每周训练计划精确到分钟，下雨？室内练！', rDesc: '打球？看心情，看天气，看黄历，看星座运势',
-    color: '#3498db' }
-];
+const QS = [{"dim":"dim3","text":"输给一个你觉得不该输的对手后，你的心理状态是？","opts":[{"emoji":"😡","text":"愤怒复盘三小时：第3局第2分不该那样打！今晚必失眠","s":{"dim3":3}},{"emoji":"😤","text":"闷闷不乐半小时，在备忘录写下\"下周必须报仇\"","s":{"dim3":1}},{"emoji":"😅","text":"\"没事没事状态不好\"——嘴上没事，内心已把他记在小本本上","s":{"dim3":-1}},{"emoji":"😌","text":"\"今日天气不错，出汗了，血赚！\"真诚地开心","s":{"dim3":-3}}]},{"dim":"dim1","text":"阳光正好，微风不燥，你体内的网球之魂突然觉醒——于是你？","opts":[{"emoji":"🔥","text":"迅速点入微信群看是否有人约球","s":{"dim1":3}},{"emoji":"👍","text":"第一时间主动在各大约球群组织球局","s":{"dim1":1}},{"emoji":"🤔","text":"打开微信直接联系相熟的球友看有没有时间","s":{"dim1":-1}},{"emoji":"🙈","text":"联系自己的陪打/教练看他时间如何","s":{"dim1":-3}}]},{"dim":"dim4","text":"是什么神秘力量让你最终拿起球拍走出家门？","opts":[{"emoji":"📋","text":"日历说了算。每周二四六是网球日，跟上班打卡一样神圣不可侵犯","s":{"dim4":3}},{"emoji":"🔋","text":"罪恶感驱动。这周还没动过，再不出门身体要生锈了","s":{"dim4":1}},{"emoji":"📲","text":"随时准备着，群里或者球友一声呼唤——\"走不走？\"刚好有空，走！","s":{"dim4":-1}},{"emoji":"🌤️","text":"天时地利人和——阳光正好、不冷不热、不饿不困、星座运势三星以上","s":{"dim4":-3}}]},{"dim":"dim2","text":"比赛到40-40的关键分，你准备发球，脑子里想的是？","opts":[{"emoji":"💣","text":"一发全力轰出去！不进算我的，进了算你的（输了）","s":{"dim2":3}},{"emoji":"⚡","text":"八成力发个平击，先压制住，下一拍再解决","s":{"dim2":1}},{"emoji":"🌀","text":"发个带切的外角球把对手拉出场外，然后上网截击","s":{"dim2":-1}},{"emoji":"🪄","text":"发个下手发球…谁说下手发球不能得分？（坏笑）","s":{"dim2":-3}}]},{"dim":"dim3","text":"关于球拍/球线/手胶/球鞋，你属于哪类人？","opts":[{"emoji":"🔬","text":"装备极客：能跟你讲一小时聚酯线和羊肠线的区别，包里常备全套装备","s":{"dim3":3}},{"emoji":"🔧","text":"实用玩家：研究过，选了一套适合自己的，不会频繁换但知道参数","s":{"dim3":1}},{"emoji":"🛒","text":"爱美先生/女士：打球颜值第一位，只要好看什么都可以","s":{"dim3":-1}},{"emoji":"🤷","text":"能用就行：拍子朋友淘汰的，线断了才穿，鞋底磨平了觉得还能撑","s":{"dim3":-3}}]},{"dim":"dim1","text":"你是那种会主动在朋友圈/群里喊人约球的人吗？","opts":[{"emoji":"📢","text":"是我！群里的\"球局发起人\"称号不是白来的","s":{"dim1":3}},{"emoji":"🤝","text":"偶尔会，但主要是熟人圈子里张罗","s":{"dim1":1}},{"emoji":"📩","text":"基本不主动，但别人喊我一般都会去","s":{"dim1":-1}},{"emoji":"🏠","text":"约球？不如在家躺着。能单约绝不群发","s":{"dim1":-3}}]},{"dim":"dim4","text":"去球局的风格，最接近以下哪种？","opts":[{"emoji":"😱","text":"未雨绸缪型，提前一天计划好，按时去订地方约球","s":{"dim4":3}},{"emoji":"🎲","text":"薛定谔的球局——心情好了临时呼朋引伴找人去打","s":{"dim4":1}},{"emoji":"🤷","text":"佛系球局——有就有没有就算了，大不了去练习墙挥两下","s":{"dim4":-1}},{"emoji":"🤔","text":"什么？还要自己去约？——一直以来都是别人约好叫我","s":{"dim4":-3}}]},{"dim":"dim2","text":"最能描述你球风的是？","opts":[{"emoji":"🦍","text":"底线猛男/女：站定了往死里抽，对手不跑吐算我输","s":{"dim2":3}},{"emoji":"🐆","text":"进攻型全能：主要靠速度和力量压迫，偶尔变节奏","s":{"dim2":1}},{"emoji":"🦊","text":"节奏大师：切削、高球、平击、上旋不停切换，对手懵圈","s":{"dim2":-1}},{"emoji":"🐍","text":"防守反击型：磨到对手怀疑人生然后一击致命","s":{"dim2":-3}}]},{"dim":"dim3","text":"你每年在网球上的花费，内心OS是？","opts":[{"emoji":"💰","text":"\"投资自己！\"装备+教练+场地…一年五位数，值！","s":{"dim3":3}},{"emoji":"💳","text":"\"合理消费\"——该花的花，但不会为了网球吃土","s":{"dim3":1}},{"emoji":"🤑","text":"\"好贵啊…\"每次续场地费都要心理建设，\"上次不是才交过？\"","s":{"dim3":-1}},{"emoji":"🧮","text":"\"免费场地不香吗？\"找到免费场的快乐，比赢球还大","s":{"dim3":-3}}]},{"dim":"dim1","text":"刷了半天约球群/小红书找搭子后，你的心理状态最接近？","opts":[{"emoji":"😤","text":"\"找个能打的比找对象还难！！！\"愤而关掉手机","s":{"dim1":3}},{"emoji":"🫠","text":"翻了几十个帖子还没找到，心累但继续刷","s":{"dim1":1}},{"emoji":"😐","text":"习惯了，偶尔能捡到一个合适的就算赚到","s":{"dim1":-1}},{"emoji":"😴","text":"刷着刷着就困了…算了明天再说吧 zzz","s":{"dim1":-3}}]},{"dim":"dim4","text":"你离\"找个教练系统练一下\"之间，最大的拦路虎是？","opts":[{"emoji":"💰","text":"钱包在抗议——好教练500/h起，学一个月够买一支新拍了","s":{"dim4":3}},{"emoji":"⏰","text":"时间像海绵里的水——挤一挤…算了挤不出来，周末只想躺平","s":{"dim4":1}},{"emoji":"🔍","text":"选择困难症——网上教练信息五花八门，不知道哪个靠谱怕踩雷","s":{"dim4":-1}},{"emoji":"😎","text":"自驱力爆棚——\"看YouTube也能学！\"（然后收藏夹吃灰）","s":{"dim4":-3}}]},{"dim":"dim2","text":"如果网球有\"最让人崩溃瞬间\"排行榜，你的第一名是？","opts":[{"emoji":"💥","text":"连续三个暴力正手全出界，旁边场的人都笑了","s":{"dim2":3}},{"emoji":"🐌","text":"想发个快的，结果一看测速器：比大爷晨练还慢","s":{"dim2":1}},{"emoji":"🎯","text":"脑子里画好了完美的线路图，手上执行出来像随机的","s":{"dim2":-1}},{"emoji":"🧊","text":"训练时像费德勒，一打比赛像第一次碰网球拍","s":{"dim2":-3}}]},{"dim":"dim3","text":"以下哪种对手会让你当场想收拍回家？","opts":[{"emoji":"🤥","text":"线审自己当——压线球统统算出界，关键分必赖","s":{"dim3":3}},{"emoji":"🐢","text":"发球仪式感大师——每次发球拍球20下、绕场半圈、深呼吸三次","s":{"dim3":1}},{"emoji":"🦁","text":"人狠话不多——全程不说话只赢球，你觉得自己像付费陪练","s":{"dim3":-1}},{"emoji":"🧸","text":"菜得自信——嘴里说着\"刚学的\"然后每个球都往天上打","s":{"dim3":-3}}]},{"dim":"dim1","text":"你理想中的球友是什么水平？","opts":[{"emoji":"💀","text":"比我强两个档次！被虐才有进步，被暴打是最高礼遇","s":{"dim1":3}},{"emoji":"⚖️","text":"差不多就行，势均力敌最好玩","s":{"dim1":1}},{"emoji":"😎","text":"稍微比我弱一点点的…可以享受赢的快感","s":{"dim1":-1}},{"emoji":"🐣","text":"只要人品好、不鸽我，水平无所谓","s":{"dim1":-3}}]},{"dim":"dim4","text":"上场前你会热身吗？","opts":[{"emoji":"🏋️","text":"仪式感拉满：拉伸+慢跑+迷你带+对拉热身，一套30分钟起步","s":{"dim4":3}},{"emoji":"🤸","text":"基础热身：简单拉伸，对拉几个球活动开，差不多10分钟","s":{"dim4":1}},{"emoji":"⚡","text":"极简主义：原地蹦两下甩甩胳膊，\"好了开打吧\"","s":{"dim4":-1}},{"emoji":"🏃","text":"热身是什么：上来就抡！受伤？不存在的（直到拉伤那天）","s":{"dim4":-3}}]},{"dim":"dim2","text":"如果网球之神给你一个技能点，你加在哪儿？","opts":[{"emoji":"🚀","text":"发球速度+50%！150km/h是底线，200km/h是追求","s":{"dim2":3}},{"emoji":"💪","text":"正手力量+50%！一板下去，球上能冒烟","s":{"dim2":1}},{"emoji":"🎨","text":"球感+50%！放小球、挑高球、穿越球…怎么骚怎么来","s":{"dim2":-1}},{"emoji":"🧠","text":"战术智商+50%！我就是网球诸葛亮","s":{"dim2":-3}}]},{"dim":"dim3","text":"你和球友因为什么\"翻过脸\"（或者差点翻脸）？","opts":[{"emoji":"⚔️","text":"态度不对等——我汗流浃背认真打，他在旁边说\"哎呀玩玩而已啦\"","s":{"dim3":3}},{"emoji":"📏","text":"一本正经地讨论\"刚才那球压了1毫米到底算不算出界\"（十分钟过去）","s":{"dim3":1}},{"emoji":"👻","text":"鸽王——约好的局说鸽就鸽，而且每次都有理直气壮的新理由","s":{"dim3":-1}},{"emoji":"🗣️","text":"人形音响——每打一拍都要嗷一声，隔壁场以为在放动物世界","s":{"dim3":-3}}]},{"dim":"dim1","text":"以下哪种约球翻车经历，让你最想摔拍子？","opts":[{"emoji":"🕊️","text":"换好衣服出门前被鸽。\"啊对不起今天临时有事\"——你早说啊！！！","s":{"dim1":3}},{"emoji":"💀","text":"到了球场发现对方是隐藏大佬，全程捡球say sorry，尊严碎一地","s":{"dim1":1}},{"emoji":"🤷","text":"跟完全不认识的人打球，全程尬聊，打完连名字都没记住","s":{"dim1":-1}},{"emoji":"💬","text":"过去打球发现对方完全不会，自己给人当免费陪练","s":{"dim1":-3}}]},{"dim":"dim4","text":"你练球的时候，更享受以下哪种状态？","opts":[{"emoji":"🧱","text":"一个人对着练习墙/发球机，沉浸式自我修炼，没人打扰最爽","s":{"dim4":3}},{"emoji":"🤝","text":"和固定搭子按计划练套路，一人喂球一人练，高效又默契","s":{"dim4":1}},{"emoji":"🎉","text":"三四个人轮流打+场下聊天，边练边social，练球为辅开心为主","s":{"dim4":-1}},{"emoji":"👨‍🏫","text":"教练在旁边一板一眼盯着——\"再来一个！膝盖再弯一点！别偷懒！\"","s":{"dim4":-3}}]},{"dim":"dim2","text":"你的网球技术如果是一部手机，目前处于什么状态？","opts":[{"emoji":"🔋","text":"电量20%闪红——有天赋但没人充电（请不起教练/找不到陪练）","s":{"dim2":3}},{"emoji":"📶","text":"信号满格但不知道打给谁——不知道自己的问题在哪，没人指点","s":{"dim2":1}},{"emoji":"📱","text":"系统该升级了——还在用直觉打球，想系统学但不知道从哪开始","s":{"dim2":-1}},{"emoji":"💎","text":"够用了，不想换——对自己挺满意，佛系提升，随缘进步","s":{"dim2":-3}}]}];
 
-const questions = [
-  // ========== 维度1：社交模式 (5题) ==========
-  { dim: 'dim1', text: '周五下午，群里有人吼了一声"明早9点打球！"，你的第一反应是？', opts: [
-    { emoji: '🔥', text: '秒回"11111"并开始规划明天穿哪套球衣', score: {dim1: 3} },
-    { emoji: '👍', text: '回复"好的"然后默默把闹钟调到8点半', score: {dim1: 1} },
-    { emoji: '🤔', text: '先看看都有谁去，人不对就说"哎呀明天有事"', score: {dim1: -1} },
-    { emoji: '🙈', text: '装作没看见，明天睡到自然醒它不香吗', score: {dim1: -3} }
-  ]},
-  { dim: 'dim1', text: '你是那种会主动在朋友圈/群里喊人约球的人吗？', opts: [
-    { emoji: '📢', text: '是我！群里的"球局发起人"称号不是白来的', score: {dim1: 3} },
-    { emoji: '🤝', text: '偶尔会，但主要是熟人圈子里张罗', score: {dim1: 1} },
-    { emoji: '📩', text: '基本不主动，但别人喊我一般都会去', score: {dim1: -1} },
-    { emoji: '🏠', text: '约球？不如在家躺着。能单约绝不群发', score: {dim1: -3} }
-  ]},
-  { dim: 'dim1', text: '你对目前找球友/约球的整体感受是什么？', opts: [
-    { emoji: '😤', text: '心累！找球友像大海捞针，约10次成1次', score: {dim1: 3} },
-    { emoji: '😅', text: '还行吧，偶尔麻烦但能接受，凑合着打', score: {dim1: 1} },
-    { emoji: '🙂', text: '挺顺利的，有固定圈子，不太需要找新人', score: {dim1: -1} },
-    { emoji: '🤷', text: '无所谓。有人约就去，没人就自己练', score: {dim1: -3} }
-  ]},
-  { dim: 'dim1', text: '你理想中的球友是什么水平？', opts: [
-    { emoji: '💀', text: '比我强两个档次！被虐才有进步，被暴打是最高礼遇', score: {dim1: 3} },
-    { emoji: '⚖️', text: '差不多就行，势均力敌最好玩', score: {dim1: 1} },
-    { emoji: '😎', text: '稍微比我弱一点点的…可以享受赢的快感', score: {dim1: -1} },
-    { emoji: '🐣', text: '只要人品好、不鸽我，水平无所谓', score: {dim1: -3} }
-  ]},
-  { dim: 'dim1', text: '你在约球/找球友过程中遇到过最烦人的情况是？', opts: [
-    { emoji: '🕊️', text: '被放鸽子！说好的局说没就没，白白浪费一个下午', score: {dim1: 3} },
-    { emoji: '👻', text: '水平差距太大。报了3.0实际1.5，两边都尴尬', score: {dim1: 1} },
-    { emoji: '🐂', text: '遇到黄牛/二道贩子。场地被加价倒卖，约球帖是钓鱼的', score: {dim1: -1} },
-    { emoji: '💬', text: '沟通太累。确定时间/地点/人数要来回几十条消息', score: {dim1: -3} }
-  ]},
+const TYPES = {"EBCP":{"code":"EBCP","name":"雷霆战神","role":"首席网球运营官","emoji":"⚡","tagline":"组局狂魔·暴力输出·冠军癌·计划控","desc":"【球场角色】你就是网球圈的\"话事人\"。群里永远是你第一个喊\"这周什么时候打球\"，场地上永远是你正手暴击的声音最响，打完球永远是你张罗聚餐。你的存在感就像球场上的一面旗帜——有你在的地方，球局就活了。\n\n【比赛风格】你的比赛不是比赛，是战争。每一分都当赛点打，每一个球都往死里抽。你的正手是真正的武器，对手看到你引拍就开始后退。一旦落后你会进入\"狂暴模式\"——眼睛发红、呼吸加重、每一拍都带着杀意。这种状态下你可能会连追5局，也可能因为发力过猛把球打飞到场外马路上。\n\n【约球行为】你是群里的\"组局发动机\"。从周一就开始在群里预热：\"这周末谁打球？\"。周五开始疯狂@所有人。如果响应的人不够，你会启动Plan B：私信每一个在线的人。你的微信群置顶全是约球群，手机通讯录里存着超过50个球友的联系方式。\n\n【装备态度】你对装备的研究堪比网球杂志编辑。能准确说出市面所有主流球拍的挥重、硬度、拍框厚度。你的球包里至少有两支同款备用拍。你会定期用测磅器检查线床张力，一旦发现掉磅超过5%，立刻剪线重穿。\n\n【优势】组织能力MAX、战斗力爆表、计划性强、在球友圈威望高\n【弱点】容易用力过猛、输了心情差影响后续几天、偶尔把友谊赛当大满贯打","advice":"偶尔切换\"实习生模式\"——不打分的球，不设KPI的局，纯粹享受挥拍的快乐。不是每一场球都是年终总决赛，也不是每一个球都需要全力暴击。尝试每周安排一次\"轻松球局\"，只打回合不对抗，你会发现自己其实也很享受这种状态。","star":{"name":"拉斐尔·纳达尔","emoji":"🇪🇸","reason":"同样的战神气质——每一分都当赛点打，热身时跑步上场，绝不放弃任何一个球"},"stars":["纳达尔","德约科维奇","小威廉姆斯"],"weapon":"董事会决议锤","wEmoji":"🔨","wNote":"一票否决，一击必杀","animal":"独角兽CEO","aEmoji":"🦄","aNote":"稀有物种，统领全局","weather":"战略级雷暴","weEmoji":"⛈️","weNote":"来势汹汹，KPI全达标","matches":[{"code":"EFCP","name":"首席技术顾问","reason":"CEO+CTO黄金组合。你负责冲锋，TA负责狙击。你暴击开路，TA精准补刀"},{"code":"IBCP","name":"独立项目经理","reason":"互相尊重各自的训练计划。场上全力以赴，场下各自精彩。成年人的体面球友关系"},{"code":"EBCR","name":"市场拓展总监","reason":"都爱社交、都爱赢、都爱聚餐。TA的随性刚好帮你从紧绷中松一口气"}]},"EBTP":{"code":"EBTP","name":"暴风骑士","role":"品牌公关总监","emoji":"🌪️","tagline":"社交达人·暴力美学·佛系心态·计划控","desc":"【球场角色】你是网球圈的\"人气王\"。如果你不打网球，可以考虑去当综艺主持人——你的存在能让任何一场球局的气氛升温15度。大家来打球，一半是为了打球，一半是为了看你今天又能整什么活。\n\n【比赛风格】你的球风像摇滚演唱会——高潮迭起、不可预测。上一秒你可能轰出一记150km/h的ACE球，下一秒你就在跟场边观众击掌。你的暴力输出是真的暴力，但你的心态又出奇地好——\"输了？哎呀没事，下次再赢！\"你是唯一能把\"不在乎输赢\"和\"每一拍都往死里打\"同时做到的人。\n\n【约球行为】你约球的方式像在开派对。朋友圈发一张球场照片配文\"今天天气真好！\"，半小时后就有七八个人私信你。你不需要主动找人，人都会主动找你。你的球局永远不缺人，而且永远不缺笑声。\n\n【装备态度】你的装备永远是全场最靓的。球拍要最新款限定色、球鞋要联名款、手胶的颜色要跟衣服搭配。你换了三支球拍都不一定找到最适合的，但你买装备的过程本身就是一种享受。\n\n【优势】人气最高、气氛担当、暴力与佛系的完美平衡、训练有规划\n【弱点】装备换太快反而影响手感稳定、比赛时偶尔注意力不集中（因为在跟人聊天）","advice":"你的性格组合是16种类型里最\"社交友好\"的。保持这种快乐网球的态度！如果想更上一层楼，试试在比赛前20分钟进入\"静默模式\"——不听音乐、不聊微信、专心热身。你会发现专注力带来的提升。","star":{"name":"盖尔·孟菲尔斯","emoji":"🇫🇷","reason":"同样华丽且快乐——能打出惊天好球，但输了也笑嘻嘻地和对手拥抱"},"stars":["孟菲尔斯","克耶高斯","巴蒂"],"weapon":"社交媒体风暴","wEmoji":"📱","wNote":"一发朋友圈，全城球友响应","animal":"人气海豚","aEmoji":"🐬","aNote":"聪明合群，人见人爱","weather":"网红级台风","weEmoji":"🌬️","weNote":"来的时候轰动全城，走了大家还在讨论","matches":[{"code":"EBTR","name":"创意文案策划","reason":"你负责组局TA负责造梗。你俩打球能笑岔气，回头率100%"},{"code":"EFTP","name":"艺术总监","reason":"暴力美学×艺术气质的完美平衡。一个用力量，一个用巧劲"},{"code":"EBTP","name":"同类-另一个公关总监","reason":"两个社交达人凑一起=球局永远不缺人，气氛永远在巅峰"}]},"EBCR":{"code":"EBCR","name":"狂野犀牛","role":"市场拓展总监","emoji":"🦏","tagline":"社交核心·暴力猛男·胜负欲拉满·随缘球王","desc":"【球场角色】你是网球圈的\"街头霸王\"。没有计划、没有战术、没有热身——但你往球场上一站，所有人都会下意识地退半步。你的天赋是肉眼可见的，但你的随性也是肉眼可见的。\n\n【比赛风格】你的打法像野生的——没有任何教科书的痕迹，全靠本能。正手像抡大锤，发球像投石机，每一个动作都充满了原始的力量感。对手可能技术比你好，但很少有人能在气势上压倒你。你的比赛永远精彩——因为连你自己都不知道下一拍会打向哪里。\n\n【约球行为】你约球的方式很随缘。想打了就在群里吼一声\"有人吗\"，然后凑到谁算谁。凑不到？那就不打，换个运动。你从不焦虑约不到球——因为以你的性格和实力，总有不够人的局需要你来\"填坑\"。\n\n【装备态度】你的装备政策是\"能用就行\"。拍子是三年前买的，线是半年前穿的，手胶已经看不出来本来的颜色了。但神奇的是，你拿着这支\"古董拍\"依然能打出让装备控们目瞪口呆的球。\n\n【优势】天赋型选手、爆发力惊人、人脉广泛、适应性极强\n【弱点】稳定性取决于当天心情、容易受伤（因为不热身）、比赛后期体力跟不上","advice":"上天给了你一副好身体，不要浪费它。试着每周做一次有计划的训练——哪怕只是对着发球机打100个球。你会发现把\"天赋\"和\"计划\"结合起来，你就是不可战胜的。","star":{"name":"胡安·马丁·德尔波特罗","emoji":"🇦🇷","reason":"同样拥有毁天灭地的正手，天赋异禀但随性不羁"},"stars":["德尔波特罗","萨芬","孟菲尔斯"],"weapon":"野性狼牙棒","wEmoji":"🪓","wNote":"不讲究招式，上去就是抡","animal":"冲锋犀牛","aEmoji":"🦏","aNote":"横冲直撞，势不可挡","weather":"突发沙尘暴","weEmoji":"🌪️","weNote":"没有预警，说来就来","matches":[{"code":"EBCP","name":"首席网球运营官","reason":"TA帮你做计划，你帮TA拉人气——CEO和CMO的天作之合"},{"code":"EFCR","name":"客户关系经理","reason":"俩人都不做计划但人脉都广。组局靠默契不靠Excel，完美"},{"code":"IBCR","name":"独立商务代表","reason":"一起莽、一起赢、一起不写训练计划。惺惺相惜的野性组合"}]},"EBTR":{"code":"EBTR","name":"荒原闪电","role":"创意文案策划","emoji":"⚡","tagline":"社交达人·暴力打法·佛系心态·随缘模式","desc":"【球场角色】你是网球圈的\"气氛组组长\"。如果没有你，网球会是一项无聊的运动——你的存在证明了\"打球\"和\"开心\"可以是一回事。你像一只在草地上撒欢的金毛犬：热情、单纯、快乐，而且杀伤力惊人。\n\n【比赛风格】你是全场唯一一个能在输球时笑得比赢球还灿烂的人。你的暴力正手是认真的，但你对结果的态度是完全不认真的。你会为一个好球欢呼，也会为自己的低级失误自嘲。跟你打球的人都会不自觉放松下来——因为你的快乐真的有传染力。\n\n【约球行为】你以为自己是\"随缘约球\"，其实你约球的频率比大多数人都高。因为总有人看到你在群里活跃就顺便喊你，你也从来不拒绝。\"我在哪？我在球场！\"是你每周至少说两次的话。\n\n【装备态度】你的装备选择标准只有一个：好看。至于好不好用？那是打完之后才考虑的事。你的球包里可能会出现在球场上完全用不到的东西——比如一包零食、一个充电宝、还有上次爬山带回来的纪念品。\n\n【优势】16种类型里最快乐的、感染力强、社交直觉一流、心态无敌\n【弱点】稳定性≈彩票中奖率、容易鸽（不是故意的但总是迟到）、比赛时注意力不集中","advice":"快乐是你的超能力。但偶尔也要在地球上着陆——至少记一下下次约球的时间地点。如果想赢，比赛前试着把手机放包里，给自己10分钟\"闭嘴专注时间\"。","star":{"name":"尼克·克耶高斯","emoji":"🇦🇺","reason":"天赋爆炸、娱乐性拉满——观众的快乐就是他的快乐"},"stars":["克耶高斯","布沙尔","莫亚"],"weapon":"快乐烟花弹","wEmoji":"🎆","wNote":"一触即发，绚烂全场","animal":"哈士奇","aEmoji":"🐕","aNote":"热情奔放，永远让你猜不到接下来要干嘛","weather":"晴天霹雳","weEmoji":"☀️","weNote":"在一片祥和中突然砸出时速180的ACE","matches":[{"code":"EBTP","name":"品牌公关总监","reason":"TA帮你组织规划，你帮TA活跃气氛。互补型CP，完美搭档"},{"code":"EFTR","name":"用户体验设计师","reason":"两个快乐至上主义者凑在一起，打完球去撸串才是本番"},{"code":"IBTR","name":"独立创意顾问","reason":"两个佛系暴力派——想打就约，不想打就鸽，互相理解，从不埋怨"}]},"EFCP":{"code":"EFCP","name":"寒冰狙击","role":"首席技术顾问","emoji":"🎯","tagline":"社交核心·技术流·冠军癌·计划控","desc":"【球场角色】你是网球圈的\"技术总监\"。在所有人还在讨论\"今天手感好不好\"的时候，你已经在分析\"为什么今天第3局的第2个球打出了比平时高15%的上旋\"。你是那种能一边打球一边在大脑里建数学模型的人。\n\n【比赛风格】你的每一拍都不是随机的——它一定有一个战术目的。你的落点像用圆规画过的，你的旋转像用仪器校准过的。你不追求暴力，你追求效率。你赢球的方式是让对手自己崩溃——\"他怎么打都打到我最难受的位置\"。\n\n【约球行为】你约球的同时也在\"选人\"。你会根据今天想练什么来挑选球友：想练接发球的时候找发球好的，想练网前的时候找爱上网的。你的约球大脑就像一个数据库，每个人都有标签。\n\n【装备态度】你是装备界的爱因斯坦。你能跟人讲两小时聚酯线和天然肠线的分子结构差异。你的球拍是自己配重的，你的手胶缠绕方向是经过力学计算的。你觉得\"差不多\"这个词就应该从网球字典里删除。\n\n【优势】智商碾压级战术、技术精准、计划执行率接近100%、分析能力惊人\n【弱点】过度思考导致决策延迟、偶尔显得不够\"热血\"、受伤后恢复期会因为不能执行计划而焦虑","advice":"你的头脑是你最大的武器，但有时候它也是你的负担。试着每周打一场\"不动脑的球\"——不听战术、不分析数据、不记比分。让身体自由挥拍，你会发现一种不一样的快乐。","star":{"name":"诺瓦克·德约科维奇","emoji":"🇷🇸","reason":"每一拍都经过精密计算——柔韧、精确、无懈可击的技术教科书"},"stars":["德约科维奇","费德勒","辛吉斯"],"weapon":"算法制导导弹","wEmoji":"🏹","wNote":"弹道计算完毕，精准命中","animal":"战术猎鹰","aEmoji":"🦅","aNote":"万米高空盘旋，锁定每一个漏洞","weather":"极地寒流","weEmoji":"❄️","weNote":"冷静、精准、让对手脊背发凉","matches":[{"code":"EBCP","name":"首席网球运营官","reason":"CEO+CTO=科技公司。TA负责冲，你负责准。TA暴击，你狙击"},{"code":"IFCP","name":"数据分析经理","reason":"两个人可以聊一整晚线床密度和旋转率的关系，灵魂伴侣"},{"code":"EFTP","name":"艺术总监","reason":"都是技术流但TA更轻松。你认真时TA陪你认真，你累时TA说\"走撸串吧\""}]},"EFTP":{"code":"EFTP","name":"灵狐诗人","role":"艺术总监","emoji":"🦊","tagline":"社交核心·艺术球风·佛系心态·计划达人","desc":"【球场角色】你是网球圈的\"审美天花板\"。如果说其他人打球是在做运动，你打球是在搞创作。你的每一个动作都自带滤镜，每一场比赛都是一部慢镜头文艺片。球友们在群里的评价永远是：\"看他打球真是一种享受。\"\n\n【比赛风格】你的球风就是优雅本人。不放没必要的暴力，不跑多余的一步。你的节奏感像节拍器，你的动作像教科书配了背景音乐。你打球不为了赢——但如果赢了，那一定是赢得最漂亮的那一种。\n\n【约球行为】你约球的方式也很文艺。不发群公告，不发朋友圈，而是一条精心措辞的私信：\"这周六下午，阳光正好，要不要打一场？\"你的约球成功率达到90%，因为没人会拒绝一个如此优雅的邀请。\n\n【装备态度】你的装备品味是公认的。不追求最新，追求最美。你的球拍可能是五年前的款式，但品相保养得比新拍的还好。你知道穿线师傅的星座，因为你们关系的亲密程度已经超出了普通顾客和商家的范畴。\n\n【优势】球风最优雅、审美在线、心态平和、计划执行率高\n【弱点】偶尔因为太过优雅而缺少侵略性、面对\"蛮不讲理\"型对手时容易被打乱节奏","advice":"保持你的优雅。但偶尔也可以\"接地气\"一下——打一场不讲技术的乱战，你会发现偶尔的\"不优雅\"也是一种自由。另外，你的低调让你很少参加比赛，试试报个名吧，让别人也欣赏一下你的艺术。","star":{"name":"罗杰·费德勒","emoji":"🇨🇭","reason":"网球艺术的终极化身——每一拍都是一幅画，优雅是永恒的主题"},"stars":["费德勒","拉德万斯卡","阿加西"],"weapon":"概念艺术品","wEmoji":"🪄","wNote":"不靠蛮力，全靠创造力和想象力","animal":"银狐","aEmoji":"🦊","aNote":"聪慧灵动，优雅与智慧并存","weather":"雨后彩虹","weEmoji":"🌈","weNote":"温柔绚丽，让人心情瞬间明亮","matches":[{"code":"EFCP","name":"首席技术顾问","reason":"诗人×狙击手。TA提供精度，你提供灵感。力与美的完美平衡"},{"code":"EBTP","name":"品牌公关总监","reason":"你俩的球局是网球圈的视觉盛宴——颜值与实力的双重天花板"},{"code":"IFTP","name":"研发科学家","reason":"两个计划控+艺术家的共振。安静地一起变强，安静地一起发光"}]},"EFCR":{"code":"EFCR","name":"灵动蜂鸟","role":"客户关系经理","emoji":"🐦","tagline":"社交达人·技术派·胜负执着·随缘玩家","desc":"【球场角色】你是网球圈的\"斜杠青年\"。你同时拥有社交达人的热情、技术流的细腻、竞争者的好胜心——以及完全不做计划的随性。你像一个永远不复习但考试总能拿A的天才学生，让那些做满笔记的人又羡慕又困惑。\n\n【比赛风格】你的技术是认真的，但你的比赛策略是即兴的。你能用切削和旋转把对手绕晕，但你自己也会因为忘记比分而需要确认\"现在是几比几\"。你赢的球常常是你自己都没想到的——\"咦，这就赢了？\"\n\n【约球行为】你的约球圈子广到可以出一本\"城市网球人物志\"。你认识各种类型的球友，而且神奇的是你跟他们每个人都能找到合适的相处模式。和竞技型打你认真，和佛系型打你放松。你是网球圈的人际交往天才。\n\n【装备态度】你知道什么装备好，但你觉得\"研究到这个程度就行了\"。你有固定的装备偏好不好，但不会为了追求极致而不断更换。你的装备策略是\"好用且好看\"，达到了实用主义和美学的平衡。\n\n【优势】全能型选手、社交圈广、即兴能力一流、心态可调\n【弱点】比赛后期注意力下降、偶尔因为忘记报分产生争议、没有训练计划导致进步曲线像过山车","advice":"你的\"天然全能型\"打法很迷人。但如果能在保持随性的同时，偶尔给自己定一个小目标（比如\"这个月练好二发\"），你会发现原来自己可以比现在更强。不需要变成计划狂魔，只需要一个小本子。","star":{"name":"斯特凡诺斯·西西帕斯","emoji":"🇬🇷","reason":"技术与创造力并存，认真与随性在体内和平共处"},"stars":["西西帕斯","蒂姆","科贝尔"],"weapon":"社交蝴蝶刀","wEmoji":"🗡️","wNote":"轻巧灵动，以巧破力","animal":"蜂鸟","aEmoji":"🐦","aNote":"小巧灵动，在花丛（球友圈）中自由穿梭","weather":"四月春风","weEmoji":"🍃","weNote":"温暖和煦，偶尔带点犀利的小情绪","matches":[{"code":"EBCR","name":"市场拓展总监","reason":"你俩是网球圈最强的\"双核引擎\"——社交MAX+战斗力MAX"},{"code":"EFCR","name":"同类-另一个客户关系","reason":"互相理解\"为什么不做计划也能赢\"。灵魂级别的共鸣"},{"code":"IFCR","name":"独立财务顾问","reason":"技术派的安静默契——不需要多说话，球拍就是沟通语言"}]},"EFTR":{"code":"EFTR","name":"快乐海豚","role":"用户体验设计师","emoji":"🐬","tagline":"社交达人·艺术大师·佛系之王·随缘之神","desc":"【球场角色】你是网球圈的\"欢乐大使\"。联合国应该给你发一个\"提升人类幸福感特别贡献奖\"——因为跟你打一场球，心情能好三天。你的存在证明了网球不是竞技，是生活美学。\n\n【比赛风格】你打球的方式像是在跳舞。你的动作流畅得像水一样，你的笑容灿烂得像太阳一样。你会在打出好球的时候自己鼓掌，会在对手打出好球的时候真诚夸赞。跟你比赛的人常常会忘记自己是在比赛，因为太享受了。\n\n【约球行为】你是唯一一个约不到球也不会焦虑的人。\"今天没人？没事，我去练习墙也能玩一下午。\"你对于约球这件事的态度是——有最好，没有也行，反正我不缺乐趣。但奇怪的是，你越是不主动约，越有人想约你。\n\n【装备态度】你的装备够用就行，但每次换新装备你都会感到一种特别的快乐。你不会花大量时间研究参数，但你会在发现一款\"打着特别舒服\"的拍子后一直用到天荒地老。\n\n【优势】全网最快乐、感染力MAX、无需外部激励就能享受网球、永远不会网球倦怠\n【弱点】\"赢\"这件事偶尔会从你的雷达上彻底消失、跟竞技型球友打球时可能出现频率不匹配","advice":"你是网球哲学的终极形态——\"享受即胜利\"。但你的天赋其实能让你赢得更多，如果你愿意偶尔\"认真一把\"。不需要改变自己的佛系本质，只需要每隔一段时间参加一场小比赛，你会发现认真起来自己有多强。","star":{"name":"阿什莉·巴蒂","emoji":"🇦🇺","reason":"世界排名第一？好的。退役去钓鱼？好的。快乐永远排第一"},"stars":["巴蒂","桑托罗","孟菲尔斯"],"weapon":"欢乐弹幕","wEmoji":"🎈","wNote":"不伤人，只传播快乐","animal":"海豚","aEmoji":"🐬","aNote":"聪明爱玩，是全场的快乐源泉","weather":"晴间多云","weEmoji":"🌤️","weNote":"舒适宜人，偶尔飘来一朵惊喜的云","matches":[{"code":"EBTR","name":"创意文案策划","reason":"两个快乐病毒凑一起——方圆十米内无人能保持严肃"},{"code":"IFTR","name":"独立哲学家","reason":"你们是唯一不需要说话就能一起享受网球的组合——灵魂同频"},{"code":"EFTR","name":"同类-另一位UX","reason":"快乐×快乐=快乐²。笑声加倍，撸串计划×4"}]},"IBCP":{"code":"IBCP","name":"孤狼之牙","role":"独立项目经理","emoji":"🐺","tagline":"社交隐士·暴力重炮·冠军偏执狂·计划狂人","desc":"【球场角色】你是网球圈的\"都市传说\"。球友们知道你的存在，但很少有人见过你的全貌。你总是在人最少的时候出现在球场，在灯光熄灭前离开。你不是不合群——你只是把所有的社交能量都留给了网球本身。\n\n【比赛风格】你的比赛是无声的杀戮。没有一句多余的废话，没有一个多余的动作。正手暴击、发球轰炸、战术执行——精准得让人害怕。你不需要观众的喝彩，不需要对手的认可。你只需要自己知道自己做到了。\n\n【约球行为】你的约球方式极其高效——只找一两个经过检验的\"靠谱球友\"，从不参与群接龙。你的训练时间像军事行动一样精确，迟到是不存在的，请假是罕见的。你的球友都知道：跟孤狼约球，时间是铁的。\n\n【装备态度】你的装备是经过严格测试和长期验证的最优解。你试过市面上几乎所有装备后选定了最适合自己的那一套，然后就不换了。你的球包里每一样东西都有明确的用途和固定的位置。\n\n【优势】专注力顶级、计划执行力100%、技术硬件超强、自律到可怕\n【弱点】社交圈太小限制了约球选择、独自训练缺乏外部反馈、偶尔因为过于严肃让球友感到压力","advice":"你是真正的网球修道士。但偶尔走出你的\"狼穴\"吧。找个E人球友——让他帮你搞定社交，你只需要出现、打球、赢球。你会发现有人分担\"订场\"\"约人\"\"拉群\"这些事之后，你有更多精力专注于网球本身。","star":{"name":"丹尼尔·梅德韦杰夫","emoji":"🇷🇺","reason":"冰面下的火山——外表永远冷静，内心燃烧着对胜利的无限渴望"},"stars":["梅德韦杰夫","施瓦茨曼","瓦林卡"],"weapon":"暗影之刃","wEmoji":"🗡️","wNote":"无声无息，一击封喉","animal":"孤狼","aEmoji":"🐺","aNote":"独来独往，战斗力天花板","weather":"月黑风高","weEmoji":"🌑","weNote":"安静、危险、让人呼吸都不敢大声","matches":[{"code":"EBCP","name":"首席网球运营官","reason":"TA是你在这个世界上唯一需要的社交接口——帮你搞定一切杂务，你只管打"},{"code":"IFCP","name":"数据分析经理","reason":"两个计划控×技术控的完美默契。不需要语言，只需要数据"},{"code":"IBTP","name":"独立研发工程师","reason":"都是I人、都有计划、都不爱说话——完美打球体验，无需社交应酬"}]},"IBTP":{"code":"IBTP","name":"暗影刺客","role":"独立研发工程师","emoji":"🥷","tagline":"独行侠·暴力美学·佛系心态·计划控","desc":"【球场角色】你是网球圈的\"神秘扫地僧\"。江湖上很少有你的传说，但每个跟你打过的人都会记住你。你像一个隐居在深山的忍者——不参与武林纷争，但一旦出剑，必定见血。\n\n【比赛风格】你的出现总是突然的。平时你在球场上的时间规律但安静。一旦进入比赛状态，你的暴力正手会瞬间点燃——然后又迅速地恢复平静。你不在乎比赛结果，但你的每一拍都是全力。你训练是为了自己，不是为了赢谁。\n\n【约球行为】你约球的方式是低调的。固定一两个人、固定时间、固定场地。你不喜欢频繁更换球友，因为磨合的成本让你觉得不划算。你的球友不需要是你的朋友——只需要是好的训练伙伴。\n\n【装备态度】你的装备朴实但精准。你会在决定装备前做充分的研究，一旦选定就不会因为新款上市而动摇。你的拍子可能不是最新款，但一定是最适合你打法的。\n\n【优势】自律、专注、不被外界干扰、技术持续精进\n【弱点】缺乏社交互动导致信息闭塞、过于独立可能错过学习和进步的机会","advice":"你的忍者之道令人敬佩。但偶尔走出你的\"隐村\"——参加一场公开赛或者加入一个网球社群。你的技术值得被更多人看到，你也能从交流中获得新的启发。","star":{"name":"斯坦·瓦林卡","emoji":"🇨🇭","reason":"沉默的强者，不鸣则已一鸣惊人。单反是他的杀手锏，安静是他的力量"},"stars":["瓦林卡","卡洛维奇","锦织圭"],"weapon":"忍者刀","wEmoji":"🗡️","wNote":"快、准、狠，打完就闪，不留痕迹","animal":"黑豹","aEmoji":"🐆","aNote":"优雅、迅捷、独行","weather":"晨雾","weEmoji":"🌫️","weNote":"来去无踪，只留下对手的困惑和敬畏","matches":[{"code":"IBCP","name":"独立项目经理","reason":"你们可能是唯一能互相理解\"沉默打球\"乐趣的人"},{"code":"EBTP","name":"品牌公关总监","reason":"TA帮你处理一切社交杂务。你只需要出现，挥拍，走人"},{"code":"IFTP","name":"研发科学家","reason":"安静的实验室搭档——各自在各自的世界里修炼，偶尔交会即是巅峰"}]},"IBCR":{"code":"IBCR","name":"独行野猪","role":"独立商务代表","emoji":"🐗","tagline":"孤僻强者·暴力莽夫·胜负欲拉满·随缘之王","desc":"【球场角色】你是网球圈的\"狂野传说\"。没人知道你什么时候会出现，但每次你出现都让人印象深刻。你不走寻常路——不社交、不计划、不热身。但你的存在本身就是一种力量宣言。\n\n【比赛风格】你的打法能气死教科书。动作不标准但力量爆表，战术不存在但直觉超强。你像一个没有GPS导航的越野车——不知道下一站去哪，但到哪儿都能开出路来。你的赢球方式常常让人匪夷所思——\"这也能赢？\"\n\n【约球行为】你不约球。你等着别人来约你。不是因为高冷——纯粹是因为懒。但奇怪的是，总有人来约你。可能是因为你的球风太独特了，让人打过一次就忘不了。\n\n【装备态度】你的装备政策是\"用到坏\"。你的球拍手柄已经被磨出了你手指的形状。你的球鞋鞋底已经磨平了但你还在穿。你不在乎装备是不是最新款——你只在乎球能不能打过去。\n\n【优势】天赋异禀、直觉惊人、野性力量、不可预测\n【弱点】技术动作不规范导致上限受限、没有计划导致进步随机、容易受伤","advice":"你这头野猪需要加个导航。找个P人（计划控）球友帮你做规划——他的计划加上你的野性，等于一支无人能挡的军队。你可以不改变自己的性格，只需要找到一个能跟你互补的人。","star":{"name":"马拉特·萨芬","emoji":"🇷🇺","reason":"天赋异禀但随性到了极致——摔拍子的艺术造诣无人能及"},"stars":["萨芬","伊万尼塞维奇","德尔波特罗"],"weapon":"野猪冲撞","wEmoji":"🐗","wNote":"不讲道理，撞上去就对了","animal":"独行犀牛","aEmoji":"🦏","aNote":"不扎堆，但存在感爆表","weather":"孤立雷暴","weEmoji":"⛈️","weNote":"独立形成，精准打击，威力惊人","matches":[{"code":"EBCR","name":"市场拓展总监","reason":"两个莽夫的灵魂共鸣。但他负责喊人，你负责莽——分工明确"},{"code":"IBCP","name":"独立项目经理","reason":"TA给你计划，你给TA激情。野兽被装上了GPS后的威力"},{"code":"IBTR","name":"独立创意顾问","reason":"两个独行侠的默契——约好就来，打完就走，无需寒暄"}]},"IBTR":{"code":"IBTR","name":"沙漠仙人掌","role":"独立创意顾问","emoji":"🌵","tagline":"独行侠·暴力狠人·佛系心态·随缘到底","desc":"【球场角色】你是网球圈的\"沙漠传说\"。你可以在极端恶劣的条件下生存——没有固定球友？没关系的。没有固定场地？不是问题。没有训练计划？从来不存在的。你就像沙漠里的仙人掌——不需要时常浇水，但谁碰谁知道疼。\n\n【比赛风格】你的球风是间歇性的。可能一个月不碰球拍，然后突然现身球场打出一个让人怀疑人生的ACE。你的实力像一个休眠火山——平时不声不响，爆发时惊天动地。\n\n【约球行为】你的约球模式是\"被动触发\"。你从不主动发起，但一旦有人在群里发了\"缺一个人\"，你会鬼使神差地回复\"我来\"。你的约球成功率达到90%——因为你不挑剔，什么时间、什么场地、什么人都能打。\n\n【装备态度】你的装备可能很久没更新，但每一件都是经过时间考验的。你的拍子上可能有些污渍和划痕——那不是邋遢，那是岁月的勋章。\n\n【优势】独立自主、适应力超强、佛系心态、无压力打球\n【弱点】训练不连续导致手感波动、可能长期处于\"休赛期\"","advice":"沙漠里的仙人掌也要偶尔喝点水。给自己订一个底线——比如\"每月至少打两次\"。不是为了赢，而是为了让你的刺保持锋利。你的天赋不需要被束缚，但需要被规律地使用。","star":{"name":"伊沃·卡洛维奇","emoji":"🇭🇷","reason":"不废话，一发ACE，打完就走——最高效的网球，最安静的传说"},"stars":["卡洛维奇","克耶高斯","德尔波特罗"],"weapon":"仙人掌","wEmoji":"🌵","wNote":"不主动攻击，但碰一下让你终身难忘","animal":"沙漠蝎子","aEmoji":"🦂","aNote":"独居沙漠，一击致命","weather":"沙漠热浪","weEmoji":"🏜️","weNote":"平日寂静无声，爆发时热浪扑面","matches":[{"code":"EBTR","name":"创意文案策划","reason":"唯一能让你笑出声的人。因为TA比你还随缘，比你还不靠谱"},{"code":"IBCR","name":"独立商务代表","reason":"两个独行侠不需要约定——眼神一碰，就知道今天谁来打"},{"code":"IFTR","name":"独立哲学家","reason":"安静的最高境界——一场完全不需要语言的网球"}]},"IFCP":{"code":"IFCP","name":"暗影蝰蛇","role":"数据分析经理","emoji":"🐍","tagline":"社交回避·技术毒蛇·胜负偏执·计划周密","desc":"【球场角色】你是网球圈的\"幕后大脑\"。你不会在群里说太多话，但你的每一次击球都在传递一个信息——\"我已经分析过你了，你的弱点在第X个回合后会暴露\"。你是那种对手最害怕的类型：冷静、精准、致命。\n\n【比赛风格】你的比赛像下一盘国际象棋。每一个球都是经过思考的——不是\"我打这里\"，而是\"我打这里，然后他会打到那里，然后我就会在这里终结\"。你的耐心是普通人无法理解的——你愿意用20个回合来设置一个陷阱。\n\n【约球行为】你的约球方式像在筛选样本。你会选择特定类型的人打球，然后默默收集数据。你不需要社交，你只需要好的训练伙伴。你的标准很简单：准时、认真、水平匹配。\n\n【装备态度】你是所有品牌的梦中客户——因为你一旦认准一个产品，就会一直用。但品牌想要让你换新款基本不可能——因为你觉得\"没毛病为什么要换\"。你的装备像你的战术一样稳定。\n\n【优势】战术天才、耐心惊人、装备稳定、计划执行力满分\n【弱点】偶尔\"分析瘫痪\"——想太多导致出手慢了0.5秒、不适合混乱型球局","advice":"你的大脑是网球场上最锋利的武器。但偶尔关掉分析引擎——用身体的直觉去打一场球。你会发现没有战术的比赛有时候反而更快乐。而且，你的战术库早晚会满的——偶尔也需要\"清空缓存\"。","star":{"name":"安迪·穆雷","emoji":"🇬🇧","reason":"网球场上的国际象棋手——每一个球都经过了反复的推演和计算"},"stars":["穆雷","哈勒普","辛纳"],"weapon":"数据分析毒牙","wEmoji":"🐍","wNote":"咬住弱点就不松口，每一次攻击都有数据支撑","animal":"黑曼巴蛇","aEmoji":"🐍","aNote":"冷静克制，高效且致命","weather":"连绵细雨","weEmoji":"🌧️","weNote":"一点点磨掉所有对手的意志力","matches":[{"code":"EFCP","name":"首席技术顾问","reason":"两个技术控的灵魂碰撞——能从线床密度聊到天气对旋转的影响"},{"code":"IFTP","name":"研发科学家","reason":"实验室二人组——你出数据，TA出理论。无敌的研究型搭档"},{"code":"IBCP","name":"独立项目经理","reason":"两个计划狂的对决——比谁先完成训练目标，良性内卷"}]},"IFTP":{"code":"IFTP","name":"冰川隐士","role":"研发科学家","emoji":"🏔️","tagline":"独来独往·技术大师·佛系心态·计划严谨","desc":"【球场角色】你是网球圈的\"世外高人\"。你打球的方式就像隐居山林的武学宗师——不参与江湖纷争，但功夫早已登峰造极。你的存在证明了\"认真\"和\"佛系\"并不矛盾——你可以既有完美的训练计划，又完全不在乎比赛结果。\n\n【比赛风格】你的技术是你用时间和孤独打磨出来的。你不需要观众，不需要裁判，甚至不需要对手——你只需要一面练习墙就能练一整天。你在比赛中不会有情绪波动，因为你的目标不是赢，而是\"打出自己满意的一拍\"。\n\n【约球行为】你几乎不主动约球。但如果有被推荐过的球友来约，你会答应。你的约球标准是\"安静、认真、不废话\"。你不介意别人水平高低，但你在意对方的态度。\n\n【装备态度】你的装备像你的性格——低调但精致。你知道什么好，但不会到处说。你会在深入调研后做出选择，然后长期保持。你的球拍保养得比大多数人的手表都好。\n\n【优势】技术纯熟、自律惊人、内心平静、独立自足\n【弱点】过于封闭可能错过新趋势和技术、社交稀缺导致约球选择少","advice":"你可能是最接近\"网球禅\"境界的人。但偶尔下山看看外面的世界吧——参加一场比赛，或者加入一个社群。你的修行成果值得被更多人欣赏，而且你可能会意外发现——山下也很有趣。","star":{"name":"比约恩·博格","emoji":"🇸🇪","reason":"冰山般冷静，用技术征服一切。巅峰时退役——真正的高人"},"stars":["博格","费德勒","巴蒂"],"weapon":"冰霜算法","wEmoji":"❄️","wNote":"冷静计算，精准冻结对手所有可能性","animal":"雪鸮","aEmoji":"🦉","aNote":"静立山巅，俯瞰一切","weather":"高山永冻层","weEmoji":"🏔️","weNote":"高冷圣洁，不动如山","matches":[{"code":"IFCP","name":"数据分析经理","reason":"谁能陪你安静练一整天球？只能是另一个IF人"},{"code":"EFTP","name":"艺术总监","reason":"唯一能让你下山的E人——温柔地拉着你走出舒适区"},{"code":"IFTR","name":"独立哲学家","reason":"两个隐士练完两小时球后，沉默地坐着喝咖啡——最完美的社交"}]},"IFCR":{"code":"IFCR","name":"沉默山猫","role":"独立财务顾问","emoji":"🐱","tagline":"安静独立·技术猎人·胜负执着·随缘行事","desc":"【球场角色】你是网球圈的最强\"伪装者\"。表面上你说\"随便打打就好\"，内心却在精确计算每一个差一点就能赢的分数。你像一个口是心非的猫——外表高冷傲娇，内心胜负欲暗涌。\n\n【比赛风格】你的技术是真正的\"内功\"。平时不显山不露水，但到了关键分你就会突然变得异常专注。你的比赛最大的特点是——嘴上说着不在意，每一拍都在全力以赴。\n\n【约球行为】你的约球策略是\"等\"。你不喜欢主动联系，但你也不拒绝别人联系你。你的社交圈小但精——可能只有三四个固定球友，但每一个都经过了时间的考验。\n\n【装备态度】你的装备选择贯彻了\"性价比\"哲学。你不买最贵的，但你买最适合的。你的装备研究是做在购买之前的——买完就不再纠结。\n\n【优势】技术扎实、关键时刻专注力爆发、球友质量高、独立性强\n【弱点】\"口是心非\"可能导致情绪积压、没有训练计划限制了进步速度","advice":"承认吧！你其实很想赢。接受这一点之后，你会轻松很多。给自己制定一个简单的月度计划——不用太复杂，只需要一个方向。你的技术加上计划，等于质的飞跃。","star":{"name":"多米尼克·蒂姆","emoji":"🇦🇹","reason":"平时沉默寡言，一到赛场上就燃起来了——内心永远在燃烧"},"stars":["蒂姆","锦织圭","科贝尔"],"weapon":"精算猎刀","wEmoji":"🔪","wNote":"不轻易出鞘，一旦出手必致命","animal":"山猫","aEmoji":"🐱","aNote":"独居山林，内敛但精准","weather":"森林迷雾","weEmoji":"🌲","weNote":"看不清深浅，暗藏杀机","matches":[{"code":"EFCR","name":"客户关系经理","reason":"TA有你不具备的社交能力，你有TA不具备的专注力——完美互补"},{"code":"IFTR","name":"独立哲学家","reason":"两个\"嘴上说随便打\"的I人——内心戏极其丰富且精彩"},{"code":"IBCP","name":"独立项目经理","reason":"TA能把你的随缘打法装进一个系统框架里——野兽有了导航"}]},"IFTR":{"code":"IFTR","name":"竹林清风","role":"独立哲学家","emoji":"🍃","tagline":"隐世高人·艺术球风·绝对佛系·随遇而安","desc":"【球场角色】你是网球圈的\"哲学大师\"。你打球已经超越了\"运动\"的范畴，进入了一种\"修行\"的境界。你不为胜负、不为社交、不为锻炼——你打球纯粹是因为喜欢网球本身。这种状态是很多人都追求但达不到的。\n\n【比赛风格】你的球风如行云流水。没有刻意的发力、没有急躁的动作、没有任何多余的东西。你的每一拍都恰到好处——不多一分力，不少一丝旋转。跟你打球的人常常会产生一种错觉：好像自己不是在比赛，而是在参与一场静心仪式。\n\n【约球行为】你可能是16种类型里最\"不约球\"的人。不是因为不想打——而是因为你觉得缘分到了自然会有球打。神奇的是，缘分好像真的经常到。总有人会想起你，总会有空位需要你。\n\n【装备态度】你的装备是你性格的完美映射——不张扬，但精致。你可能用的是一支早就停产的经典款，因为你觉得\"新不如旧\"。你的装备保养得一丝不苟，每一件都有它存在的理由。\n\n【优势】网球哲学境界最高、心态绝对平和、技术纯熟自然、独立自足\n【弱点】过于佛系可能错过自我挑战的机会、存在感极低——有时候球友会忘了还有你这号人物","advice":"你已经找到了网球的\"道\"。但如果哪天想\"入世\"体验一下，参加一场正式比赛会是一次有趣的经历。不是为了赢——只是为了看看\"另一个世界的网球\"是什么样子。或许你会发现，偶尔的热闹也不赖。","star":{"name":"阿什莉·巴蒂","emoji":"🇦🇺","reason":"世界第一然后退役去钓鱼——最佛系的王者，最纯粹的灵魂"},"stars":["巴蒂","科维托娃","拉德万斯卡"],"weapon":"竹笛","wEmoji":"🎋","wNote":"以柔克刚，以静制动——最强的武器就是不需要武器","animal":"林间鹿","aEmoji":"🦌","aNote":"优雅宁静，与世无争","weather":"秋日微风","weEmoji":"🍂","weNote":"淡然从容，岁月静好","matches":[{"code":"EBTR","name":"创意文案策划","reason":"唯一能把你从\"修仙模式\"拉回人间的人——而且你居然不讨厌"},{"code":"IFTP","name":"研发科学家","reason":"两个隐士的终极默契——在沉默中打一场最深刻的比赛"},{"code":"IFTR","name":"同类-另一位哲学家","reason":"竹林中两位高人对坐——不需要语言，球拍就是全部对话"}]}};
 
-  // ========== 维度2：战斗风格 (5题) ==========
-  { dim: 'dim2', text: '比赛到30-30的关键分，你准备发球，脑子里想的是？', opts: [
-    { emoji: '💣', text: '一发全力轰出去！不进算我的，进了算你的（输了）', score: {dim2: 3} },
-    { emoji: '⚡', text: '八成力发个平击，先压制住，下一拍再解决', score: {dim2: 1} },
-    { emoji: '🌀', text: '发个带切的外角球把对手拉出场外，然后上网截击', score: {dim2: -1} },
-    { emoji: '🪄', text: '发个下手发球…谁说下手发球不能得分？（坏笑）', score: {dim2: -3} }
-  ]},
-  { dim: 'dim2', text: '最能描述你球风的是？', opts: [
-    { emoji: '🦍', text: '底线猛男/女：站定了往死里抽，对手不跑吐算我输', score: {dim2: 3} },
-    { emoji: '🐆', text: '进攻型全能：主要靠速度和力量压迫，偶尔变节奏', score: {dim2: 1} },
-    { emoji: '🦊', text: '节奏大师：切削、高球、平击、上旋不停切换', score: {dim2: -1} },
-    { emoji: '🐍', text: '防守反击型：磨到对手怀疑人生然后一击致命', score: {dim2: -3} }
-  ]},
-  { dim: 'dim2', text: '网球技术上，最让你头疼/卡住的地方是？', opts: [
-    { emoji: '💥', text: '稳定性差。暴力是够了，但出界率也感人，经常自己打飞', score: {dim2: 3} },
-    { emoji: '🐌', text: '速度和力量上不去。想加力但一加就失误，很憋屈', score: {dim2: 1} },
-    { emoji: '🎯', text: '落点不够精准。脑子里想打角落，手上打中路', score: {dim2: -1} },
-    { emoji: '🧊', text: '比赛中心态崩。训练猛如虎，一打比赛就手抖脚软', score: {dim2: -3} }
-  ]},
-  { dim: 'dim2', text: '如果网球之神给你一个技能点，你加在哪儿？', opts: [
-    { emoji: '🚀', text: '发球速度+50%！150km/h是底线，200km/h是追求', score: {dim2: 3} },
-    { emoji: '💪', text: '正手力量+50%！一板下去，球上能冒烟', score: {dim2: 1} },
-    { emoji: '🎨', text: '球感+50%！放小球、挑高球、穿越球…怎么骚怎么来', score: {dim2: -1} },
-    { emoji: '🧠', text: '战术智商+50%！我就是网球诸葛亮', score: {dim2: -3} }
-  ]},
-  { dim: 'dim2', text: '关于提升技术，你目前最大的困扰是？', opts: [
-    { emoji: '💸', text: '请教练太贵了。好教练一小时几百块，顶一周场地费', score: {dim2: 3} },
-    { emoji: '🎯', text: '找不到合适的陪练。想练多球/对抗，没合适水平的人', score: {dim2: 1} },
-    { emoji: '📹', text: '不知道自己的问题在哪。没人帮忙看动作、纠正错误', score: {dim2: -1} },
-    { emoji: '📚', text: '网上教程太杂了。学了反而更乱，不知道哪个靠谱', score: {dim2: -3} }
-  ]},
+// ==================== 状态 ====================
+let currentQ = 0;
+let scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+let answers = new Array(QS.length).fill(null);
+let touchStartX = 0;
+let touchStartY = 0;
+let currentResultCode = '';
+let currentResultData = null;
 
-  // ========== 维度3：胜负执念 (5题) ==========
-  { dim: 'dim3', text: '输给一个你觉得不该输的对手后，你的心理状态是？', opts: [
-    { emoji: '😡', text: '愤怒复盘三小时：第3局第2分不该那样打！今晚睡不着了', score: {dim3: 3} },
-    { emoji: '😤', text: '闷闷不乐半小时，备忘录写下"下周必须报仇"', score: {dim3: 1} },
-    { emoji: '😅', text: '"没事没事今天状态不好"——嘴上这么说，心里有点小不爽', score: {dim3: -1} },
-    { emoji: '😌', text: '"今天天气不错，输了也出汗了，血赚！"真诚地这么想', score: {dim3: -3} }
-  ]},
-  { dim: 'dim3', text: '关于球拍/球线/手胶/球鞋，你属于哪类人？', opts: [
-    { emoji: '🔬', text: '装备极客：能跟你讲一小时聚酯线和羊肠线的区别', score: {dim3: 3} },
-    { emoji: '🔧', text: '实用玩家：研究过，选了一套适合自己的，知道参数', score: {dim3: 1} },
-    { emoji: '🛒', text: '差不多先生/女士：淘宝搜"网球拍 好评"买的', score: {dim3: -1} },
-    { emoji: '🤷', text: '能用就行：拍子朋友淘汰的，线断了才穿，鞋磨平才换', score: {dim3: -3} }
-  ]},
-  { dim: 'dim3', text: '你每年在网球上的花费，内心OS是？', opts: [
-    { emoji: '💰', text: '"投资自己！"装备+教练+场地…一年五位数起步', score: {dim3: 3} },
-    { emoji: '💳', text: '"合理消费"——该花的花，但不会为了网球吃土', score: {dim3: 1} },
-    { emoji: '🤑', text: '"打网球好贵啊…"每次续场地费都要心理建设一番', score: {dim3: -1} },
-    { emoji: '🧮', text: '"免费球场不香吗？"到处找免费/低价场地，球打秃了才换', score: {dim3: -3} }
-  ]},
-  { dim: 'dim3', text: '打比赛/对战时，最影响你体验的是？', opts: [
-    { emoji: '😤', text: '对手耍赖/乱报比分。认真比赛的人遇到瞎搞的，心态直接炸', score: {dim3: 3} },
-    { emoji: '🐢', text: '对手节奏太慢。每次发球拍20下球，拖到天荒地老', score: {dim3: 1} },
-    { emoji: '🦁', text: '被暴打。对手太强，全程捡球，毫无还手之力像陪练', score: {dim3: -1} },
-    { emoji: '🧸', text: '虐菜无聊。对手太弱，打着打着就想玩手机', score: {dim3: -3} }
-  ]},
-  { dim: 'dim3', text: '你和球友之间最容易因为什么产生不愉快？', opts: [
-    { emoji: '⚔️', text: '对输赢的态度不一致。我很认真，他觉得玩玩而已', score: {dim3: 3} },
-    { emoji: '📏', text: '对规则的理解不同。压线算不算出界能争十分钟', score: {dim3: 1} },
-    { emoji: '👻', text: '他老是临时取消。约好的局说鸽就鸽，还每次都理直气壮', score: {dim3: -1} },
-    { emoji: '🗣️', text: '他在场上太吵了。每打一拍都要嗷嗷叫，像在打WWE', score: {dim3: -3} }
-  ]},
-
-  // ========== 维度4：训练模式 (5题) ==========
-  { dim: 'dim4', text: '你决定"今天去打球"的最大驱动力是？', opts: [
-    { emoji: '📋', text: '计划到了。每周固定几天是打球日，跟上班一样不能翘', score: {dim4: 3} },
-    { emoji: '🔋', text: '想活动活动。这周还没运动过，罪恶感驱动', score: {dim4: 1} },
-    { emoji: '📲', text: '有人约了。朋友来问，刚好有空，那就去吧', score: {dim4: -1} },
-    { emoji: '🌤️', text: '看心情/天气/星座。天时地利人和都凑齐了才会出门', score: {dim4: -3} }
-  ]},
-  { dim: 'dim4', text: '关于订网球场地，你的真实体验是？', opts: [
-    { emoji: '📅', text: '提前一周设闹钟抢。热门时段秒没，抢到算我赚到', score: {dim4: 3} },
-    { emoji: '🗓️', text: '提前几天订。有时能订到有时不行，看运气', score: {dim4: 1} },
-    { emoji: '🔍', text: '临时找。出发前搜一下哪个场有空，不行就换运动', score: {dim4: -1} },
-    { emoji: '🤷', text: '从来不自己订。都是别人订好了叫我，我不知道怎么订', score: {dim4: -3} }
-  ]},
-  { dim: 'dim4', text: '阻碍你定期系统性训练（找教练/上培训课）的最大因素是？', opts: [
-    { emoji: '💰', text: '太贵了。好教练300-800/h，长期学是一笔不小开销', score: {dim4: 3} },
-    { emoji: '⏰', text: '没时间。工作日搬砖，周末只想放松，没精力上课', score: {dim4: 1} },
-    { emoji: '🤔', text: '不知道去哪找好教练。网上信息杂，怕踩雷花冤枉钱', score: {dim4: -1} },
-    { emoji: '😅', text: '觉得没必要。我又不是要打职业，自己瞎打打挺好', score: {dim4: -3} }
-  ]},
-  { dim: 'dim4', text: '上场前你会热身吗？', opts: [
-    { emoji: '🏋️', text: '仪式感拉满：拉伸+慢跑+激活+对拉，30分钟起步', score: {dim4: 3} },
-    { emoji: '🤸', text: '基础热身：简单拉伸，对拉几个球活动开，10分钟', score: {dim4: 1} },
-    { emoji: '⚡', text: '极简主义：原地蹦两下，甩甩胳膊，好了开始吧', score: {dim4: -1} },
-    { emoji: '🏃', text: '热身是什么？上来就抡！受伤？（直到拉伤那天）', score: {dim4: -3} }
-  ]},
-  { dim: 'dim4', text: '如果有一个APP能解决你网球生活中的一个问题，你最希望它解决什么？', opts: [
-    { emoji: '🔍', text: '智能匹配球友：根据水平、性格、位置自动推荐合适的搭子', score: {dim4: 3} },
-    { emoji: '🤖', text: '自动约球：跟它说"周六下午想打球"，剩下它全搞定', score: {dim4: 1} },
-    { emoji: '🛡️', text: '信用担保：再也不怕被放鸽子，放鸽子的人有代价', score: {dim4: -1} },
-    { emoji: '🏟️', text: '场地秒订：不用跟黄牛抢，公平透明地订到场地', score: {dim4: -3} }
-  ]}
-];
-
-// ===================== 类型描述库 =====================
-const typeDB = {
-  'EBCP': {
-    code: 'EBCP', name: '雷霆战神', title: '社交悍匪 · 暴力狂魔 · 冠军偏执狂 · 计划机器人',
-    emoji: '⚡',
-    desc: '你是球场上的雷神下凡！群里喊人最积极的是你，正手暴力抽击的是你，输了彻夜难眠的是你，训练日程精确到分钟的还是你。你就像一个行走的网球核弹——社交圈炸、底线炸、比分炸、训练也炸。别人打球是爱好，你打球是使命。',
-    advice: '你是冠军的料子！不过偶尔也放松一下吧，别把小区友谊赛当大满贯决赛打。还有，输一次真的不会死。',
-    weapons: { emoji: '🔨', label: '雷神之锤', note: '一击必杀，神挡杀神' },
-    animal: { emoji: '🦁', label: '草原雄狮', note: '王者气场，不可一世' },
-    weather: { emoji: '⛈️', label: '雷暴天气', note: '来势汹汹，惊天动地' },
-    celeb: '纳达尔的斗志 + 德约的纪律 + 一点点伊布的狂妄'
-  },
-  'EBTP': {
-    code: 'EBTP', name: '暴风骑士', title: '社交达人 · 暴力美学 · 佛系随缘 · 计划控',
-    emoji: '🌪️',
-    desc: '你是一位活在朋友圈里的暴力美学大师！爱约球、爱社交、正手能打死牛，但内心却出奇地佛系——输了无所谓，赢了更开心。关键是你居然还做训练计划？这个组合就像暴风雨中带着一把刻度尺：看起来很猛，其实很有分寸。',
-    advice: '你的性格组合很稀有！社交的温暖中和了暴力的冷酷。保持这种快乐网球的态度，你已经赢了。',
-    weapons: { emoji: '⚔️', label: '风暴之剑', note: '狂风骤雨，横扫千军' },
-    animal: { emoji: '🐎', label: '战马', note: '勇猛而忠诚，团队核心' },
-    weather: { emoji: '🌬️', label: '狂风', note: '来去匆匆，酣畅淋漓' },
-    celeb: '克耶高斯的激情 + 巴蒂的佛系 + 费德勒的优雅'
-  },
-  'EBCR': {
-    code: 'EBCR', name: '狂野犀牛', title: '社交核心 · 暴力猛男 · 胜负欲拉满 · 随缘球王',
-    emoji: '🦏',
-    desc: '你是球场上的社交暴力分子！喊人打球你最积极，上了场就跟开了狂暴一样猛冲猛打，输了能难受一整天。但你居然完全没有训练计划？约到就打，约不到就鸽——这很矛盾啊兄弟！就像一个没有刹车的跑车，快是真快，但去哪全靠心情。',
-    advice: '天赋型选手！你的力量是优势，但稍微加点系统性训练就能起飞。建议找一个教练朋友，让他对你进行"软性指导"。',
-    weapons: { emoji: '🪓', label: '狂暴战斧', note: '不讲究招式，抡就完了' },
-    animal: { emoji: '🦏', label: '犀牛', note: '横冲直撞，无所畏惧' },
-    weather: { emoji: '🌋', label: '火山爆发', note: '平时安静，一喷惊天' },
-    celeb: '孟菲尔斯的天赋 + 德尔波特罗的正手 + 萨芬的随性'
-  },
-  'EBTR': {
-    code: 'EBTR', name: '荒原闪电', title: '社交达人 · 暴力打法 · 佛系心态 · 随缘模式',
-    emoji: '⚡',
-    desc: '你是网球场上的快乐哈士奇！约局你最积极，打球猛如虎，但内心住着一只完全不在乎输赢的佛系猫。没有训练计划？不存在的——"计划"这个词跟你的人生毫无关系。你就是纯粹的网球快乐兽：喊人、暴扣、大笑、走人。',
-    advice: '你是球友圈里的气氛担当！保持你的快乐感染力。如果想提升技术，从"偶尔找教练上节课"开始，不用逼自己做计划。',
-    weapons: { emoji: '🎆', label: '烟花弹', note: '绚烂热闹，快乐至上' },
-    animal: { emoji: '🐕', label: '哈士奇', note: '热情奔放，拆家式打法' },
-    weather: { emoji: '☀️', label: '晴天霹雳', note: '欢乐中突然来一记暴击' },
-    celeb: '布沙尔的自由 + 莫亚的力量 + 一只喝了咖啡的金毛'
-  },
-  'EFCP': {
-    code: 'EFCP', name: '寒冰狙击', title: '社交达人 · 技术流 · 冠军癌 · 计划控',
-    emoji: '🎯',
-    desc: '你是球场上的冷面狙击手！约球你积极组局，但一上场你就进入"杀手模式"——每一拍都经过精确计算，每一个落点都像尺子量过的。你对装备的研究已经到了令人发指的地步，你的训练计划比公司的KPI还精细。球友们敬畏你，对手害怕你。',
-    advice: '你的精确和自律令人叹服。但别忘了网球还有一个叫"快乐"的东西。偶尔关掉脑子，让身体自由挥几拍。',
-    weapons: { emoji: '🏹', label: '复合弓', note: '百步穿杨，弹无虚发' },
-    animal: { emoji: '🦅', label: '猎鹰', note: '高空盘旋，精准猎杀' },
-    weather: { emoji: '❄️', label: '极地寒流', note: '冷静致命，寒气逼人' },
-    celeb: '费德勒的优雅 + 辛吉斯的球商 + 梅德韦杰夫的冷酷'
-  },
-  'EFTP': {
-    code: 'EFTP', name: '灵狐诗人', title: '社交核心 · 艺术球风 · 佛系心态 · 计划达人',
-    emoji: '🦊',
-    desc: '你是网球圈里的文艺青年！约球你张罗，球风你优雅，输赢你不在乎，但居然有训练计划？你就像一个会写诗的程序员——理性框架下藏着浪漫的灵魂。你的网球与其说是运动，不如说是一场行为艺术。球友们说看你打球像是在看芭蕾舞。',
-    advice: '你已经达到了网球的一种高级境界。但偶尔参加一些正式比赛，把你的艺术带到更大的舞台！',
-    weapons: { emoji: '🪄', label: '魔法杖', note: '不靠蛮力，全靠想象力' },
-    animal: { emoji: '🦊', label: '银狐', note: '聪慧灵动，优雅自如' },
-    weather: { emoji: '🌈', label: '雨后彩虹', note: '温柔绚丽，让人愉悦' },
-    celeb: '拉德万斯卡的灵巧 + 阿加西的触感 + 辛纳的冷静'
-  },
-  'EFCR': {
-    code: 'EFCR', name: '灵动蜂鸟', title: '社交达人 · 技术派 · 胜负执着 · 随缘玩家',
-    emoji: '🐦',
-    desc: '你是球场上一个美丽的矛盾体！社交圈你混得开，技术细腻像绣花针，赢了开心输了不甘——但你就是不做训练计划。你就像一个考试前不复习但每次都考得不错的学生，全靠灵性和天赋。球友们既羡慕你的球感，又对你的散漫感到不可思议。',
-    advice: '你的天赋和社交能力都很棒。稍微加一点训练规划，你会变得非常恐怖。试试每周固定一天"技术日"？',
-    weapons: { emoji: '🗡️', label: '细剑', note: '灵巧精准，以巧破力' },
-    animal: { emoji: '🐦', label: '蜂鸟', note: '小巧灵动，反应神速' },
-    weather: { emoji: '🍃', label: '春风', note: '温暖和煦中藏着灵动' },
-    celeb: '西西帕斯的创造力 + 蒂姆的随性 + 科贝尔的韧性'
-  },
-  'EFTR': {
-    code: 'EFTR', name: '快乐海豚', title: '社交达人 · 艺术大师 · 佛系之王 · 随缘之神',
-    emoji: '🐬',
-    desc: '你是球场上最快乐的那条海豚！约球你来张罗，打球充满创造力，输赢完全不care，训练计划是什么能吃吗？你把网球的"玩"字发挥到了极致——球到你手里就有了魔法，快乐在你身边就有了传染力。和你打球的人都会不自觉地笑起来。',
-    advice: '你可能是16种类型里最开心的那一个！保持这份纯真。如果哪天想认真一把，记得你还有隐藏的技术天赋没开发呢。',
-    weapons: { emoji: '🎈', label: '欢乐气球', note: '不伤人，只传递快乐' },
-    animal: { emoji: '🐬', label: '海豚', note: '聪明爱玩，人见人爱' },
-    weather: { emoji: '🌤️', label: '晴间多云', note: '舒适宜人，偶有惊喜' },
-    celeb: '巴蒂的淡然 + 桑托罗的诡计 + 一只快乐的小狗'
-  },
-  'IBCP': {
-    code: 'IBCP', name: '孤狼之牙', title: '社交隐士 · 暴力重炮 · 冠军偏执狂 · 计划狂人',
-    emoji: '🐺',
-    desc: '你是那种独自一人在球场练到天黑的神秘人。不爱说话、不爱组局，但一拿起球拍就仿佛换了一个人。正手暴击像炮弹，训练计划像瑞士钟表，输了能让自己加练三小时。别人觉得你高冷难接近，但只有你自己知道——你只是把所有的热情都留给了网球。',
-    advice: '你的专注和自律是顶级品质。不过偶尔向球友敞开心扉，你会发现社交也是网球的一大乐趣。找个水平相当的人一起练，效果翻倍。',
-    weapons: { emoji: '🗡️', label: '暗影之刃', note: '无声无息，一击毙命' },
-    animal: { emoji: '🐺', label: '孤狼', note: '独来独往，战力爆表' },
-    weather: { emoji: '🌑', label: '月黑风高', note: '沉默、危险、致命' },
-    celeb: '梅德韦杰夫的冷酷 + 施瓦茨曼的坚韧 + 瓦林卡的专注'
-  },
-  'IBTP': {
-    code: 'IBTP', name: '暗影刺客', title: '独行侠 · 暴力美学 · 佛系心态 · 计划控',
-    emoji: '🥷',
-    desc: '你是球场上最像刺客的存在！不声张、不组局、不争辩——但你的暴力正手会让对手记住很久。你明明有训练计划却不在乎输赢，这意味着你训练纯粹是因为喜欢。你像一个独自练剑的武林高手，不为江湖排名，只为剑法的精进。',
-    advice: '你的心态很棒！但偶尔走出舒适圈，参加一些比赛或者约一些新球友，会有不一样的收获。',
-    weapons: { emoji: '🗡️', label: '忍者刀', note: '快、准、狠，事了拂衣去' },
-    animal: { emoji: '🐆', label: '黑豹', note: '优雅、迅捷、难以捉摸' },
-    weather: { emoji: '🌫️', label: '晨雾', note: '神出鬼没，来去无踪' },
-    celeb: '卡洛维奇的发球 + 锦织圭的打磨 + 一个沉默的忍者'
-  },
-  'IBCR': {
-    code: 'IBCR', name: '独行野猪', title: '孤僻强者 · 暴力莽夫 · 胜负欲拉满 · 随缘之王',
-    emoji: '🐗',
-    desc: '你是球场上最难以捉摸的存在！不约人、不计划，但只要站上球场就跟开了狂暴模式的野猪一样横冲直撞。你特别想赢，但你没有计划——这就像一个没有导航的赛车手，全凭直觉在莽。经常输得莫名其妙，赢也赢得稀里糊涂。但你不在乎，你要的是那种挥拍的快感。',
-    advice: '你的野性力量很宝贵。找一个教练或高手朋友，哪怕每月一次，他帮你指点一下就能让你少走很多弯路。',
-    weapons: { emoji: '🔧', label: '狼牙棒', note: '不精致但很管用' },
-    animal: { emoji: '🐗', label: '野猪', note: '横冲直撞，势不可挡' },
-    weather: { emoji: '🌪️', label: '沙尘暴', note: '混乱狂暴，方向全靠蒙' },
-    celeb: '伊万尼塞维奇的发球 + 萨芬的个性 + 一只愤怒的犀牛'
-  },
-  'IBTR': {
-    code: 'IBTR', name: '沙漠仙人掌', title: '独行侠 · 暴力狠人 · 佛系心态 · 随缘到底',
-    emoji: '🌵',
-    desc: '你是网球世界里的独行仙人掌——不依赖任何人，不需要频繁浇水（训练），但只要逮到机会就猛扎对手一身刺。你的暴力打法没有预兆、没有计划、没有社交预热，就像沙漠里的暴晒突然来一记雷劈。你完全不在意胜负，但你每次挥拍都莫名其妙地有杀伤力。',
-    advice: '你的独立性是优势，但长期不训练手感会退化。保持一个底线频率，哪怕每月打两次，你的"刺"会更锋利。',
-    weapons: { emoji: '🌵', label: '仙人掌', note: '不主动攻击，但碰一下叫你后悔' },
-    animal: { emoji: '🦂', label: '蝎子', note: '独居沙漠，一击致命' },
-    weather: { emoji: '🏜️', label: '沙漠热浪', note: '平时安静，爆发时热浪滚滚' },
-    celeb: '德尔波特罗的暴力正手 + 克耶高斯的随性 + 沙漠里的孤胆英雄'
-  },
-  'IFCP': {
-    code: 'IFCP', name: '暗影蝰蛇', title: '社交回避 · 技术毒蛇 · 胜负偏执 · 计划周密',
-    emoji: '🐍',
-    desc: '你是球场上最冷静的猎手。不跟人社交，但你的技术比所有人都细腻。你像一条埋伏在草丛里的蝰蛇——安静、耐心、精确，一旦发现对手弱点就死死咬住不放。你有详细的训练计划，从来不鸽自己。别人觉得你神秘，其实你只是觉得网球比人有趣。',
-    advice: '你的技术和战术素养已经很高了。但网球也是社交运动，偶尔约个球友一起训练，会让你在战术层面获得新视角。',
-    weapons: { emoji: '🏹', label: '淬毒弩箭', note: '一击中的，后劲无穷' },
-    animal: { emoji: '🐍', label: '黑曼巴蛇', note: '冷静克制，致命高效' },
-    weather: { emoji: '🌧️', label: '连绵阴雨', note: '不动声色地消磨对手意志' },
-    celeb: '穆雷的战术 + 哈勒普的韧性 + 一个下棋的人工智能'
-  },
-  'IFTP': {
-    code: 'IFTP', name: '冰川隐士', title: '独来独往 · 技术大师 · 佛系心态 · 计划严谨',
-    emoji: '🏔️',
-    desc: '你就像一个隐居在雪山之巅的武学大师——不与世争，但技术炉火纯青。你独自练习、独自进步、独自享受。你有训练计划但不在乎比赛结果，意味着你追求的是网球本身而不是输赢。这是一种很高的境界，很多人一辈子都达不到。',
-    advice: '你对网球的纯粹追求令人尊敬。偶尔下山参加个比赛，让你的技术被更多人看见。顺便说，你的球友可能都在找你——去露个脸吧！',
-    weapons: { emoji: '❄️', label: '冰霜之刃', note: '寒意凛然，清冷致命' },
-    animal: { emoji: '🦉', label: '雪鸮', note: '静观世界，一击必中' },
-    weather: { emoji: '🏔️', label: '高山冰雪', note: '高冷圣洁，不可侵犯' },
-    celeb: '费德勒的优雅 + 巴蒂的淡泊 + 喜马拉雅的修行者'
-  },
-  'IFCR': {
-    code: 'IFCR', name: '沉默山猫', title: '安静独立 · 技术猎人 · 胜负执着 · 随缘行事',
-    emoji: '🐱',
-    desc: '你是球场上一只神秘的山猫。不爱说话不爱组局，但技术精湛得像狩猎多年的老手。你嘴上说着"随便打打"，其实内心贼想赢。你没有训练计划——全靠天赋和直觉。这就像一个从来不复习但每次考试都想拿第一的学生，执念和散漫在体内疯狂打架。',
-    advice: '承认吧，你其实很想赢！那就别装了，制定一个简单的训练计划，你的技术加上自律会让你变得不可战胜。',
-    weapons: { emoji: '🔪', label: '猎刀', note: '朴实无华但招招致命' },
-    animal: { emoji: '🐱', label: '山猫', note: '独居山林，猎杀无声' },
-    weather: { emoji: '🌲', label: '森林迷雾', note: '捉摸不透，暗藏杀机' },
-    celeb: '蒂姆的从容 + 锦织圭的坚韧 + 一只口是心非的猫'
-  },
-  'IFTR': {
-    code: 'IFTR', name: '竹林清风', title: '隐世高人 · 艺术球风 · 绝对佛系 · 随遇而安',
-    emoji: '🍃',
-    desc: '你是网球界的世外高人。从不主动约球，从不制定计划，从不计较输赢。但当你不经意间站上球场，所有人都被你优雅的技术征服。你打球不是为了给别人看，也不是为了赢——你只是因为喜欢那个完美的击球声音。你就像竹林里的一阵清风，来去无痕，却让人心旷神怡。',
-    advice: '你已经摸到了网球哲学的终极形态。保持这份纯粹。如果哪天需要"入世"，你的技术储备足够支撑你在任何比赛中发光。',
-    weapons: { emoji: '🎋', label: '竹笛', note: '以柔克刚，以静制动' },
-    animal: { emoji: '🦌', label: '林间鹿', note: '优雅宁静，与世无争' },
-    weather: { emoji: '🍂', label: '秋日微风', note: '淡然从容，岁月静好' },
-    celeb: '科维托娃的纯粹 + 拉德万斯卡的优雅 + 一位隐居山林的禅师'
-  }
-};
-
-// ===================== 应用 =====================
-let curQ = 0;
-let scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
-let answers = new Array(questions.length).fill(null);
-
-function start() {
-  document.getElementById('introPage').classList.add('hidden');
-  document.getElementById('testPage').classList.remove('hidden');
-  document.getElementById('resultPage').classList.add('hidden');
-  curQ = 0; scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
-  answers = new Array(questions.length).fill(null);
-  renderQContainer();
-  showQ(0);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// ==================== 页面切换 ====================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); el.scrollTop = 0; }
 }
 
-function renderQContainer() {
-  const c = document.getElementById('qContainer');
-  c.innerHTML = questions.map((q, i) => `
-    <div class="q-slide" id="slide${i}">
-      <span class="q-badge">📋 第 ${i+1} 题 / ${questions.length}</span>
-      <div class="q-title">${q.text}</div>
-      <div class="opts">
-        ${q.opts.map((o, oi) => `
-          <button class="opt-btn" id="opt${i}_${oi}" onclick="pick(${i},${oi})">
-            <span class="opt-emoji">${o.emoji}</span>
-            <span>${o.text}</span>
-          </button>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-
-  // 题号小圆点
-  const dots = document.getElementById('qDots');
-  dots.innerHTML = questions.map((_, i) => `<span class="q-dot" id="dot${i}"></span>`).join('');
-}
-
-function showQ(i) {
-  document.querySelectorAll('.q-slide').forEach(s => s.classList.remove('active'));
-  document.getElementById('slide' + i)?.classList.add('active');
-  document.getElementById('progText').textContent = `第 ${i+1}/${questions.length} 题`;
-  document.getElementById('progPct').textContent = Math.round((i+1)/questions.length*100) + '%';
-  document.getElementById('progFill').style.width = ((i+1)/questions.length*100) + '%';
-
-  document.getElementById('prevBtn').disabled = (i === 0);
-  document.getElementById('nextBtn').textContent = i === questions.length-1 ? '🎉 看结果！' : '下一题 ➡';
-  document.getElementById('nextBtn').disabled = answers[i] === null;
-
-  // 更新小圆点
-  document.querySelectorAll('.q-dot').forEach((d, di) => {
-    d.classList.remove('done', 'current');
-    if (answers[di] !== null) d.classList.add('done');
-    if (di === i) d.classList.add('current');
-  });
-
-  // 恢复选项高亮
-  if (answers[i] !== null) {
-    questions[i].opts.forEach((_, oi) => {
-      document.getElementById(`opt${i}_${oi}`)?.classList.toggle('selected', oi === answers[i]);
-    });
+// ==================== 背景粒子 ====================
+function initParticles() {
+  const container = document.getElementById('bgParticles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size = 20 + Math.random() * 80;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      animation-delay:${Math.random()*7}s;
+      animation-duration:${6+Math.random()*8}s;
+    `;
+    container.appendChild(p);
   }
 }
 
-function pick(qi, oi) {
-  answers[qi] = oi;
-  questions[qi].opts.forEach((_, oi2) => {
-    document.getElementById(`opt${qi}_${oi2}`)?.classList.toggle('selected', oi2 === oi);
-  });
-  document.getElementById('nextBtn').disabled = false;
-  document.getElementById(`dot${qi}`)?.classList.add('done');
+// ==================== Toast ====================
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 1800);
 }
 
-function next() {
-  if (answers[curQ] === null) return;
-  if (curQ === questions.length - 1) { calcResult(); return; }
-  curQ++; showQ(curQ);
+// ==================== 撒花 ====================
+function confetti() {
+  const emojis = ['🎾','🎉','✨','🌟','🏆','💥','⚡','🔥','🎯','💪','🦁','🐆','⭐','🎊'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-el';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.cssText = `
+        left:${Math.random()*100}%;
+        top:${-(20+Math.random()*80)}px;
+        animation-delay:${Math.random()*0.5}s;
+        animation-duration:${2+Math.random()*3}s;
+        font-size:${20+Math.random()*20}px;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }, i * 50);
+  }
 }
-function prev() { if (curQ > 0) { curQ--; showQ(curQ); } }
 
-function calcResult() {
-  // 计分
-  scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
-  answers.forEach((ans, i) => {
-    if (ans !== null) {
-      const sc = questions[i].opts[ans].score;
-      for (const [k, v] of Object.entries(sc)) scores[k] += v;
-    }
-  });
+// ==================== 测试流程 ====================
+function startTest() {
+  currentQ = 0;
+  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+  answers = new Array(QS.length).fill(null);
+  currentResultCode = '';
+  currentResultData = null;
+  showPage('testPage');
+  renderDotNav();
+  renderQuestion();
+}
 
-  const code =
-    (scores.dim1 >= 0 ? 'E' : 'I') +
-    (scores.dim2 >= 0 ? 'B' : 'T') +
-    (scores.dim3 >= 0 ? 'C' : 'F') +
-    (scores.dim4 >= 0 ? 'P' : 'R');
+function renderDotNav() {
+  document.getElementById('navDots').innerHTML = QS.map((_,i) =>
+    `<span class="dot" id="dot${i}"></span>`
+  ).join('');
+}
 
-  const type = typeDB[code];
-  if (!type) { alert('类型计算异常，请重新测试！'); return; }
+function renderQuestion() {
+  const q = QS[currentQ];
+  const letters = ['A','B','C','D'];
 
-  // 各维度百分比
-  const dimResults = dims.map((d, idx) => {
-    const raw = scores[d.id]; // range: -15 to +15 (5 questions × -3 to +3)
-    const pct = Math.round(50 + (raw / 15) * 50); // map to 0-100
-    const clamped = Math.max(5, Math.min(95, pct));
-    const isLeft = raw >= 0;
-    return { ...d, pct: clamped, raw, result: isLeft ? d.leftName : d.rightName, isLeft };
-  });
-
-  // 渲染
-  const wrap = document.getElementById('resultWrap');
-  wrap.innerHTML = `
-    <div class="result-hero">
-      <span class="r-emoji">${type.emoji}</span>
-      <div class="r-type">${type.code}</div>
-      <div class="r-name">${type.name}</div>
-      <div class="r-tagline">${type.title}</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:14px;">📊 四个维度画像</h3>
-      <div class="dim-bars">
-        ${dimResults.map(d => `
-          <div class="dim-bar-card" style="border-left:4px solid ${d.color};">
-            <div class="dbc-head">
-              <span class="dbc-label">${d.name}</span>
-              <span class="dbc-result" style="color:${d.color};">${d.result}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.7em;color:#aaa;margin-bottom:4px;">
-              <span>${d.leftName}</span><span>${d.rightName}</span>
-            </div>
-            <div class="dbc-bar">
-              <div class="dbc-fill" style="width:${d.pct}%;background:${d.color};"></div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="card desc-card">
-      <h3>🧐 球场人格解读</h3>
-      <p>${type.desc}</p>
-    </div>
-
-    <div class="card">
-      <h3>💡 给你的建议</h3>
-      <p style="line-height:1.8;">${type.advice}</p>
-    </div>
-
-    <div class="card metaphor-card">
-      <h3>🎭 抽象比喻三连击</h3>
-      <div class="m-row">
-        <div class="m-item">
-          <div class="m-icon">${type.weapons.emoji}</div>
-          <div class="m-label"><strong>${type.weapons.label}</strong><br><small>${type.weapons.note}</small></div>
+  document.getElementById('qCard').innerHTML = `
+    <span class="q-badge">📋 第 ${currentQ+1} / ${QS.length} 题</span>
+    <div class="q-title">${q.text}</div>
+    <div class="opts-list">
+      ${q.opts.map((o,oi) => `
+        <div class="opt ${answers[currentQ]===oi?'selected':''}" id="opt${oi}" onclick="selectOption(${oi})">
+          <span class="opt-emoji">${o.emoji}</span>
+          <span class="opt-text">${o.text}</span>
+          <span class="opt-check">${answers[currentQ]===oi?'✓':letters[oi]}</span>
         </div>
-        <div class="m-item">
-          <div class="m-icon">${type.animal.emoji}</div>
-          <div class="m-label"><strong>${type.animal.label}</strong><br><small>${type.animal.note}</small></div>
-        </div>
-        <div class="m-item">
-          <div class="m-icon">${type.weather.emoji}</div>
-          <div class="m-label"><strong>${type.weather.label}</strong><br><small>${type.weather.note}</small></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="text-align:center;color:#888;">
-      <p>🎾 <strong>网球灵魂参考</strong><br><small>${type.celeb}</small></p>
+      `).join('')}
     </div>
   `;
 
-  // 显示结果
-  document.getElementById('testPage').classList.add('hidden');
-  document.getElementById('resultPage').classList.remove('hidden');
-  wrap.classList.add('show');
+  // 更新进度
+  document.getElementById('progLabel').textContent = `第 ${currentQ+1}/${QS.length} 题`;
+  document.getElementById('progPct').textContent = Math.round((currentQ+1)/QS.length*100)+'%';
+  document.getElementById('progFill').style.width = ((currentQ+1)/QS.length*100)+'%';
 
-  // 撒花
-  spawnConfetti();
+  // 更新导航按钮
+  document.getElementById('prevBtn').disabled = currentQ === 0;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = currentQ === QS.length-1 ? '🎉 查看结果' : '下一题 →';
+  nextBtn.disabled = answers[currentQ] === null;
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // 更新圆点
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.classList.toggle('done', answers[i] !== null);
+    d.classList.toggle('current', i === currentQ);
+  });
+
+  // 触发动画
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'slideInRight 0.35s ease';
 }
 
-function spawnConfetti() {
-  const emojis = ['🎾','🎉','✨','🌟','🏆','💥','⚡','🔥','🎯','💪','🦁','🐆'];
-  for (let i = 0; i < 30; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'confetti';
-      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      el.style.left = Math.random() * 100 + '%';
-      el.style.top = -(Math.random() * 100) + 'px';
-      el.style.animationDuration = (2 + Math.random() * 3) + 's';
-      el.style.animationDelay = '0s';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 3500);
-    }, i * 60);
+function selectOption(oi) {
+  answers[currentQ] = oi;
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === oi);
+    const check = el.querySelector('.opt-check');
+    if (check) check.textContent = i === oi ? '✓' : ['A','B','C','D'][i];
+  });
+  document.getElementById('nextBtn').disabled = false;
+  document.querySelectorAll('.dot')[currentQ]?.classList.add('done');
+
+  // 轻触反馈
+  if (navigator.vibrate) navigator.vibrate(10);
+  if (currentQ < QS.length - 1) { currentQ++; renderQuestion(); document.getElementById("qCard").style.animation = "slideInRight 0.35s ease"; document.getElementById("testPage").scrollTop = 0; }
+}
+
+function nextQ() {
+  if (answers[currentQ] === null) { showToast('👆 先选一个嘛'); return; }
+  if (currentQ === QS.length - 1) { calcResult(); return; }
+  currentQ++;
+  renderQuestion();
+  document.getElementById('qCard').style.animation = 'slideInRight 0.35s ease';
+  document.getElementById('testPage').scrollTop = 0;
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    document.getElementById('qCard').style.animation = 'slideInLeft 0.35s ease';
   }
 }
 
-function restart() {
-  document.getElementById('resultPage').classList.add('hidden');
-  document.getElementById('introPage').classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// ==================== 触摸滑动 ====================
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  if (document.getElementById('testPage').classList.contains('active')) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+      if (dx < 0 && answers[currentQ] !== null) nextQ();
+      else if (dx > 0) prevQ();
+    }
+  }
+}, {passive:true});
+
+// ==================== 匹配度计算 ====================
+function calcMatch(selfCode, otherCode) {
+  let score = 0;
+  const sp = [selfCode[0],selfCode[1],selfCode[2],selfCode[3]];
+  const op = [otherCode[0],otherCode[1],otherCode[2],otherCode[3]];
+  for(let i=0;i<4;i++){
+    // 同一侧=基础分
+    const sides = [['E','I'],['B','T'],['C','F'],['P','R']];
+    if(sp[i]===op[i]) score += 25;
+    // 社交互补(0):+10, 风格互补(1):+15
+    if(i===0 && sp[i]!==op[i]) score += 10;
+    if(i===1 && sp[i]!==op[i]) score += 15;
+  }
+  return Math.min(100, score);
 }
 
-// 键盘导航
-document.addEventListener('keydown', e => {
-  if (document.getElementById('testPage').classList.contains('hidden')) return;
-  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') prev();
-  if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { if (answers[curQ] !== null) next(); }
-  if (e.key === '1') pick(curQ, 0);
-  if (e.key === '2') pick(curQ, 1);
-  if (e.key === '3') pick(curQ, 2);
-  if (e.key === '4') pick(curQ, 3);
-});
+// ==================== 计算结果 ====================
+function calcResult() {
+  try {
+  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+  answers.forEach(function(ans, i) {
+    if (ans !== null) {
+      var sc = QS[i].opts[ans].s;
+      for (var k in sc) scores[k] += sc[k];
+    }
+  });
+
+  var dim1=(scores.dim1>=0?'E':'I'),dim2=(scores.dim2>=0?'B':'T'),dim3=(scores.dim3>=0?'C':'F'),dim4=(scores.dim4>=0?'P':'R'); var code=dim1+dim2+dim3+dim4;
+  var type = TYPES[code] || TYPES[dim1+dim3+dim2+dim4];
+  if (!type) { showToast('类型未找到: '+code); return; }
+
+  currentResultCode = code;
+  currentResultData = type;
+
+  var dimResults = DIMS.map(function(d) {
+    var raw = scores[d.id];
+    var pct = Math.max(5, Math.min(95, Math.round(50+(raw/15)*50)));
+    return { label:d.name, icon:d.icon||'', color:d.color, left:d.l, right:d.r, pct:pct, result:raw>=0?d.l:d.r };
+  });
+
+  // Build match HTML
+  var matchesHTML = '';
+  if (type.matches) {
+    matchesHTML = type.matches.map(function(m,i) {
+      var mt = TYPES[m.code];
+      if (!mt) return '';
+      var badges = ['🥇','🥈','🥉'];
+      return '<div class="match-row"><span class="match-badge">'+badges[i]+'</span><div class="match-info"><span class="match-role">'+mt.role+'</span><span class="match-code">'+mt.code+' '+mt.name+'</span><span class="match-reason">'+m.reason+'</span></div><span class="match-score">'+calcMatch(code,m.code)+'%</span></div>';
+    }).join('');
+  }
+
+  var h = '';
+  h += '<div class="result-hero"><span class="r-emoji">'+type.emoji+'</span><span class="r-code">'+code+'</span><span class="r-name">'+type.name+'</span><span class="r-role">💼 球场职业：'+type.role+'</span><span class="r-tagline">'+type.tagline+'</span></div>';
+
+  h += '<div class="dim-bars">';
+  dimResults.forEach(function(d) {
+    h += '<div class="dim-bar-item" style="border-left-color:'+d.color+'"><div class="dim-bar-head"><span class="dim-bar-label" style="color:'+d.color+'">'+d.icon+' '+d.label+'</span><span class="dim-bar-result">'+d.result+'</span></div><div class="dim-bar-range"><span>'+d.left+'</span><span>'+d.right+'</span></div><div class="dim-bar-track"><div class="dim-bar-fill" style="width:'+d.pct+'%;background:'+d.color+'"></div></div></div>';
+  });
+  h += '</div>';
+
+  h += '<div class="desc-box"><h4>🧐 球场人物解读</h4><p style="white-space:pre-line">'+type.desc+'</p></div>';
+  h += '<div class="desc-box star-box"><h4>🎾 你的网球灵魂对标</h4><div class="star-card"><span class="star-flag">'+type.star.emoji+'</span><div class="star-info"><span class="star-name">'+type.star.name+'</span><span class="star-reason">'+type.star.reason+'</span></div></div><div class="star-others">同类球星：'+(type.stars||[]).join(' · ')+'</div></div>';
+  h += '<div class="desc-box match-box"><h4>🤝 最佳球友匹配 TOP 3</h4>'+matchesHTML+'</div>';
+  h += '<div class="desc-box" style="background:rgba(46,204,113,0.06);border-color:rgba(46,204,113,0.2);"><h4 style="color:#2ecc71;">💡 网球人生建议</h4><p>'+type.advice+'</p></div>';
+  h += '<div class="desc-box" style="background:rgba(155,89,182,0.06);border-color:rgba(155,89,182,0.2);"><h4 style="color:#9b59b6;">🎭 抽象比喻三连击</h4><div class="metaphor-row"><div class="metaphor-item"><span class="m-emoji">'+type.wEmoji+'</span><span class="m-label">'+type.weapon+'</span><span class="m-note">'+type.wNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.aEmoji+'</span><span class="m-label">'+type.animal+'</span><span class="m-note">'+type.aNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.weEmoji+'</span><span class="m-label">'+type.weather+'</span><span class="m-note">'+type.weNote+'</span></div></div></div>';
+
+  document.getElementById('resultContent').innerHTML = h;
+  showPage('resultPage');
+  confetti();
+  setTimeout(drawPoster, 500);
+  } catch(e) { showToast('出错: '+e.message); console.error(e); }
+}
+
+// ==================== 海报绘制 ====================
+function drawPoster() {
+  const canvas = document.getElementById('posterCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const type = currentResultData;
+  const code = currentResultCode;
+  if (!type) return;
+
+  const W = 600, H = 860;
+
+  // 背景
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0,0,W,H);
+
+  // 装饰
+  ctx.fillStyle = 'rgba(46,204,113,0.12)';
+  ctx.beginPath(); ctx.arc(W-80,120,140,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(231,76,60,0.1)';
+  ctx.beginPath(); ctx.arc(100,H-150,120,0,Math.PI*2); ctx.fill();
+
+  // 顶部条
+  const grad1 = ctx.createLinearGradient(0,0,W,0);
+  grad1.addColorStop(0,'#e74c3c'); grad1.addColorStop(0.5,'#f1c40f'); grad1.addColorStop(1,'#2ecc71');
+  ctx.fillStyle = grad1;
+  ctx.fillRect(0,0,W,5);
+
+  // 标题
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 22px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('🎾 网球人格鉴定局 🎾', W/2, 48);
+
+  // 大emoji
+  ctx.font = '90px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.emoji, W/2, 138);
+
+  // 类型代码
+  ctx.fillStyle = '#ffffff'; ctx.font = '900 60px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(code, W/2, 206);
+
+  // 类型名称
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 36px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.name, W/2, 250);
+
+  // 职业角色
+  ctx.fillStyle = '#f39c12'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('💼 '+type.role, W/2, 276);
+
+  // 副标题
+  ctx.fillStyle = '#aaaaaa'; ctx.font = '14px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.tagline, W/2, 298);
+
+  // 分割线
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(50,316); ctx.lineTo(W-50,316); ctx.stroke();
+
+  // 解读
+  ctx.fillStyle = '#cccccc'; ctx.font = '15px "PingFang SC","Microsoft YaHei",sans-serif';
+  const desc = type.desc.slice(0,85);
+  let lines = [], cur = '';
+  for (let c of desc) {
+    if (ctx.measureText(cur+c).width > W-80) { lines.push(cur); cur = c; }
+    else cur += c;
+  }
+  if (cur) lines.push(cur);
+  let y = 348;
+  lines.forEach(l => { ctx.fillText(l, W/2, y); y += 24; });
+
+  // 球星对标
+  y += 10;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
+  y += 18;
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('🎾 你的网球灵魂对标', W/2, y);
+  y += 20;
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.star.name, W/2, y);
+  y += 18;
+  ctx.fillStyle = '#999999'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.star.reason, W/2, y);
+
+  // 比喻区
+  y += 30;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
+  y += 18;
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('⚔️ 武器 · 🦁 动物 · 🌤️ 天气', W/2, y);
+
+  y += 32;
+  const metas = [
+    { emoji: type.wEmoji, label: type.weapon, note: type.wNote },
+    { emoji: type.aEmoji, label: type.animal, note: type.aNote },
+    { emoji: type.weEmojiIcon, label: type.weather, note: type.weNote }
+  ];
+  const colW = W/3;
+  metas.forEach((m,i) => {
+    const cx = colW*i + colW/2;
+    ctx.font = '40px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.emoji, cx, y);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.label, cx, y+34);
+    ctx.fillStyle = '#999999'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.note, cx, y+50);
+  });
+
+  // 底部匹配提示
+  y += 80;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-50,y); ctx.stroke();
+  if(type.matches&&type.matches[0]){
+    const m1=TYPES[type.matches[0].code];
+    ctx.fillStyle = '#777777'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('🥇 最佳球友：'+m1.code+' '+m1.role, W/2, y+20);
+  }
+
+  // 水印
+  ctx.fillStyle = '#555555'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('扫码测测你的网球人格 →', W/2, H-18);
+}
+
+// ==================== 海报弹窗 ====================
+function showPoster() {
+  document.getElementById('posterOverlay').classList.remove('hidden');
+  setTimeout(drawPoster, 200);
+}
+function hidePoster(e) {
+  if (e && e.target !== document.getElementById('posterOverlay')) return;
+  document.getElementById('posterOverlay').classList.add('hidden');
+}
+function savePoster() {
+  const canvas = document.getElementById('posterCanvas');
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = '网球人格_'+currentResultCode+'.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ 已保存到相册');
+  }, 'image/png');
+}
+
+// ==================== 分享面板 ====================
+function showSharePanel(resultMode) {
+  var panel = document.getElementById('sharePanel');
+  var overlay = document.getElementById('shareOverlay');
+  if (!panel) {
+    panel = document.createElement('div'); panel.id = 'sharePanel'; panel.className = 'share-panel';
+    overlay = document.createElement('div'); overlay.id = 'shareOverlay'; overlay.className = 'share-overlay';
+    overlay.onclick = hideSharePanel;
+    document.getElementById('app').appendChild(overlay);
+    document.getElementById('app').appendChild(panel);
+  }
+  var html = '<div class="share-panel-title">'+(resultMode?'分享我的网球人格':'邀请球友来测')+'</div>';
+  html += '<div class="share-options">';
+  html += '<div class="share-opt" onclick="copyShareLink('+resultMode+')"><span class="share-opt-icon">📋</span><span class="share-opt-label">复制链接</span><span class="share-opt-sub">发到微信群</span></div>';
+  html += '<div class="share-opt" onclick="copyShareText('+resultMode+')"><span class="share-opt-icon">💬</span><span class="share-opt-label">复制文案</span><span class="share-opt-sub">发朋友圈</span></div>';
+  if (resultMode) html += '<div class="share-opt" onclick="hideSharePanel();showPoster();"><span class="share-opt-icon">📸</span><span class="share-opt-label">生成海报</span><span class="share-opt-sub">保存图片</span></div>';
+  html += '</div>';
+  html += '<div class="share-link-row"><input class="share-link-input" value="'+window.location.href+'" readonly onclick="this.select()"/><button class="share-copy-btn" onclick="copyShareLink('+resultMode+')">复制</button></div>';
+  panel.innerHTML = html;
+  panel.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+}
+function hideSharePanel() {
+  var p=document.getElementById('sharePanel'),o=document.getElementById('shareOverlay');
+  if(p)p.classList.add('hidden'); if(o)o.classList.add('hidden');
+}
+function copyShareLink(resultMode) {
+  var text = resultMode ? '🎾 我的网球人格是【'+currentResultCode+' '+currentResultData.name+'】！来测测你是什么球场奇葩？\n'+window.location.href : '🎾 网球人格鉴定局——20道题测出你的球场奇葩人格！\n'+window.location.href;
+  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去微信群里粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按上方链接手动复制');});
+}
+function copyShareText(resultMode) {
+  var text = resultMode ? '🎾 刚刚测了网球MBTI人格测试\n\n我的球场人格是：'+currentResultCode+' '+currentResultData.name+'\n'+currentResultData.role+'\n对标球星：'+currentResultData.star.name+'\n\n👉 '+window.location.href+'\n来测测你是什么球场奇葩！' : '🎾 网球人格鉴定局\n\n20道灵魂拷问，16种球场奇葩人格\n武器·动物·天气三连比喻\n职业身份命名+球星对标\n\n好玩到停不下来！\n👉 '+window.location.href;
+  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去朋友圈粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按链接手动复制');});
+}
+function shareResult() { showSharePanel(true); }
+function shareIntro() { showSharePanel(false); }
 </script>
 </body>
 </html>
