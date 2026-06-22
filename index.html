@@ -2,1155 +2,820 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>🎾 网球人格鉴定局</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎾 网球人格鉴定局 — 你到底是什么球场奇葩？</title>
 <style>
   :root {
-    --safe-top: env(safe-area-inset-top, 20px);
-    --safe-bottom: env(safe-area-inset-bottom, 20px);
     --green: #2ecc71; --orange: #e67e22; --blue: #3498db; --red: #e74c3c;
-    --purple: #9b59b6; --yellow: #f1c40f; --teal: #1abc9c;
-    --bg: #0f0f1a; --card: #1a1a2e; --card2: #16213e;
-    --text: #e8e8e8; --muted: #888;
+    --purple: #9b59b6; --yellow: #f1c40f; --pink: #e91e63; --teal: #1abc9c;
+    --bg: #fef9e7; --card: #ffffff; --text: #2c3e50; --muted: #95a5a6;
+    --dim1: #e74c3c; --dim2: #e67e22; --dim3: #2ecc71; --dim4: #3498db;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html { font-size: 16px; height: 100%; overflow: hidden; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: var(--bg);
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    background: linear-gradient(180deg, #e8f8f5 0%, #fef9e7 30%, #fdebd0 70%, #e8f8f5 100%);
+    min-height: 100vh;
     color: var(--text);
-    height: 100%;
-    overflow: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-font-smoothing: antialiased;
-    touch-action: manipulation;
+    line-height: 1.6;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(circle at 15% 20%, rgba(231,76,60,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(46,204,113,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(241,196,15,0.03) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
   }
 
-  /* ===== 全局动画 ===== */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+  .container { max-width: 780px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+
+  /* --- 头部 --- */
+  .hero { text-align: center; padding: 30px 20px 20px; }
+  .hero .ball { font-size: 72px; display: block; animation: bounceHero 1.5s ease-in-out infinite; }
+  @keyframes bounceHero {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-24px) rotate(20deg); }
+    60% { transform: translateY(0) rotate(-15deg); }
   }
-  @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
+  .hero h1 {
+    font-size: 2em;
+    background: linear-gradient(135deg, var(--red), var(--orange), var(--green), var(--blue));
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+    margin: 10px 0;
   }
-  @keyframes pulse {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  @keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    30% { transform: translateY(-12px); }
-    60% { transform: translateY(0); }
-  }
-  @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-  @keyframes gradientBG {
+  @keyframes gradientShift {
     0%,100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
   }
-  @keyframes float {
-    0%,100% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-8px) rotate(3deg); }
-    75% { transform: translateY(6px) rotate(-2deg); }
-  }
-  @keyframes confettiDrop {
-    0% { opacity: 1; transform: translateY(-60px) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.2); }
-  }
-  @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(40px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-40px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
+  .hero .tagline { color: var(--muted); font-size: 1em; }
 
-  /* ===== 主容器 ===== */
-  #app {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ===== 顶部导航条 ===== */
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: calc(var(--safe-top) + 8px) 20px 12px;
-    position: relative;
-    z-index: 10;
-    flex-shrink: 0;
-  }
-  .top-bar-title {
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--green), var(--teal), var(--yellow));
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientBG 3s ease infinite;
-  }
-
-  /* ===== 页面容器 ===== */
-  .page {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding: 0 20px 40px;
-    display: none;
-  }
-  .page.active { display: block; animation: fadeInUp 0.4s ease; }
-
-  /* 隐藏滚动条但可滚动 */
-  .page::-webkit-scrollbar { display: none; }
-
-  /* ===== 首页 ===== */
-  .intro-hero {
-    text-align: center;
-    padding: 20px 0 30px;
-  }
-  .intro-ball {
-    font-size: 80px;
-    display: block;
-    animation: bounce 2s ease-in-out infinite;
-    filter: drop-shadow(0 8px 16px rgba(241,196,15,0.4));
-  }
-  .intro-title {
-    font-size: 32px;
-    font-weight: 900;
-    margin: 12px 0 6px;
-    letter-spacing: 2px;
-    background: linear-gradient(135deg, #2ecc71, #f1c40f, #e67e22, #e74c3c);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientBG 4s ease infinite;
-  }
-  .intro-sub { font-size: 15px; color: var(--muted); }
-  .intro-joke { font-size: 12px; color: #666; margin-top: 4px; }
-
-  .dim-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 20px 0;
-  }
-  .dim-item {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 16px 10px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.05);
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .dim-item:active { transform: scale(0.97); border-color: rgba(241,196,15,0.3); }
-  .dim-emoji { font-size: 36px; display: block; }
-  .dim-label { font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--text); }
-  .dim-pair { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  .info-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 18px 20px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .info-card p { font-size: 14px; color: #bbb; line-height: 2; }
-  .info-card .highlight { color: var(--yellow); font-weight: 700; }
-
-  /* ===== 按钮 ===== */
-  .btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 340px;
-    margin: 0 auto;
-    height: 54px;
-    border-radius: 27px;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn:active { transform: scale(0.96); }
-  .btn-primary {
-    background: linear-gradient(135deg, #e67e22, #e74c3c);
-    color: #fff;
-    box-shadow: 0 8px 28px rgba(231,76,60,0.35);
-    margin-top: 20px;
-  }
-  .btn-primary::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    animation: shimmer 2s infinite;
-  }
-  .btn-secondary {
-    background: rgba(255,255,255,0.08);
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.12);
-    margin-top: 12px;
-  }
-
-  /* ===== 答题页 ===== */
-  .test-page-inner {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-  }
-  .progress-wrap {
-    padding: 6px 0 16px;
-    flex-shrink: 0;
-  }
-  .progress-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .progress-track {
-    height: 6px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.08);
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, var(--green), var(--teal));
-    transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
-  }
-
-  .q-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 24px 20px;
-    border: 1px solid rgba(255,255,255,0.06);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .q-badge {
-    display: inline-block;
-    background: rgba(241,196,15,0.15);
-    color: var(--yellow);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 16px;
-    border-radius: 20px;
-    margin-bottom: 14px;
-    align-self: flex-start;
-  }
-  .q-title {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.5;
-    margin-bottom: 22px;
-    color: #fff;
-  }
-
-  .opts-list { display: flex; flex-direction: column; gap: 10px; }
-  .opt {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 16px;
-    border-radius: 14px;
-    border: 2px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-    transition: all 0.2s;
-    cursor: pointer;
-    position: relative;
-  }
-  .opt:active { background: rgba(46,204,113,0.08); border-color: rgba(46,204,113,0.3); }
-  .opt.selected {
-    background: rgba(46,204,113,0.12) !important;
-    border-color: var(--green) !important;
-    box-shadow: 0 0 20px rgba(46,204,113,0.15);
-  }
-  .opt-emoji {
-    font-size: 28px;
-    width: 40px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  .opt-text {
-    font-size: 14px;
-    color: #ccc;
-    line-height: 1.4;
-    flex: 1;
-  }
-  .opt-check {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    transition: all 0.2s;
-  }
-  .opt.selected .opt-check {
-    background: var(--green);
-    border-color: var(--green);
-    color: #fff;
-  }
-
-  /* 底部导航 */
-  .nav-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0;
-    gap: 12px;
-    flex-shrink: 0;
-  }
-  .nav-btn {
-    height: 44px;
-    padding: 0 22px;
-    border-radius: 22px;
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.05);
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .nav-btn:active { background: rgba(255,255,255,0.1); }
-  .nav-btn:disabled { opacity: 0.3; }
-  .nav-btn.next-btn {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    color: #fff;
-    border: none;
-    font-weight: 700;
-    box-shadow: 0 6px 20px rgba(46,204,113,0.3);
-  }
-  .nav-btn.next-btn:disabled { opacity: 0.4; }
-
-  .nav-dots {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.15);
+  /* --- 卡片 --- */
+  .card {
+    background: var(--card); border-radius: 20px; padding: 28px 24px;
+    margin: 14px 0; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
     transition: all 0.3s;
   }
-  .dot.done { background: var(--green); }
-  .dot.current { background: var(--yellow); transform: scale(1.8); }
 
-  /* ===== 结果页 ===== */
+  /* --- 介绍页 --- */
+  .dim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+  @media (max-width: 600px) { .dim-grid { grid-template-columns: repeat(2, 1fr); } }
+  .dim-item { text-align: center; padding: 14px 8px; border-radius: 14px; background: #f8f9fa; transition: transform 0.2s; }
+  .dim-item:hover { transform: translateY(-3px); }
+  .dim-item .di-emoji { font-size: 2em; display: block; }
+  .dim-item .di-label { font-size: 0.85em; color: #555; margin-top: 4px; font-weight: 600; }
+  .dim-item .di-pair { font-size: 0.75em; color: #999; margin-top: 2px; }
+
+  .btn {
+    display: inline-block; padding: 14px 36px; border: none; border-radius: 50px;
+    font-size: 1.05em; font-weight: 700; cursor: pointer; transition: all 0.25s;
+    font-family: inherit; letter-spacing: 0.5px;
+  }
+  .btn-go {
+    background: linear-gradient(135deg, var(--orange), var(--red));
+    color: #fff; box-shadow: 0 6px 20px rgba(231,76,60,0.35);
+    font-size: 1.2em; padding: 16px 50px;
+  }
+  .btn-go:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(231,76,60,0.45); }
+  .btn-nav {
+    background: #fff; color: var(--text); border: 2px solid #ddd;
+  }
+  .btn-nav:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+  .btn-restart {
+    display: block; margin: 30px auto 60px; background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #fff; box-shadow: 0 6px 20px rgba(52,152,219,0.3);
+  }
+
+  /* --- 进度条 --- */
+  .progress-wrap { margin: 0 0 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.85em; color: #888; margin-bottom: 6px; }
+  .progress-track { height: 10px; border-radius: 5px; background: #eee; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--green), var(--teal)); transition: width 0.4s ease; }
+
+  /* --- 问题区域 --- */
+  .q-slide { display: none; animation: slideUp 0.4s ease; }
+  .q-slide.active { display: block; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+  .q-badge { display: inline-block; background: var(--yellow); color: #333; font-weight: 700; padding: 5px 16px; border-radius: 20px; font-size: 0.8em; margin-bottom: 10px; }
+  .q-title { font-size: 1.25em; font-weight: 700; margin-bottom: 18px; line-height: 1.5; }
+
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+    border: 2px solid #e8e8e8; border-radius: 14px; background: #fafafa;
+    cursor: pointer; transition: all 0.2s; text-align: left; font-family: inherit;
+    font-size: 0.95em; color: var(--text);
+  }
+  .opt-btn:hover { border-color: var(--teal); background: #e8f8f5; transform: translateX(3px); }
+  .opt-btn.selected { border-color: var(--teal); background: #d5f5e3; font-weight: 600; box-shadow: 0 2px 12px rgba(26,188,156,0.15); }
+  .opt-emoji { font-size: 1.8em; flex-shrink: 0; width: 40px; text-align: center; }
+  .opt-tag { display: inline-block; background: #eee; color: #888; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; margin-left: 6px; font-weight: 400; }
+
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 22px; gap: 10px;
+  }
+  .q-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+  .q-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: all 0.3s; }
+  .q-dot.done { background: var(--green); }
+  .q-dot.current { background: var(--orange); transform: scale(1.5); }
+
+  /* —— 手机端固定底部导航 —— */
+  @media (max-width: 768px) {
+    .nav-row {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 12px 16px; margin: 0;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.06);
+    }
+    .nav-row .btn-nav {
+      padding: 12px 20px; font-size: 0.95em;
+      min-width: 85px; text-align: center;
+    }
+    .nav-row .q-dots { display: none; }
+    #testPage .card { padding-bottom: 85px; }
+    .btn-go { padding: 16px 40px; font-size: 1.1em; }
+    .btn-restart {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+      margin: 0; white-space: nowrap;
+    }
+    #resultPage { padding-bottom: 100px; }
+    .opt-btn { padding: 16px 14px; font-size: 1em; }
+    .opt-emoji { font-size: 2em; width: 44px; }
+  }
+
+  /* --- 结果页 --- */
+  .result-wrap { display: none; }
+  .result-wrap.show { display: block; animation: slideUp 0.6s ease; }
+
   .result-hero {
-    text-align: center;
-    padding: 30px 20px;
-    border-radius: 20px;
-    background: linear-gradient(160deg, #1a1a2e, #16213e);
-    border: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 16px;
+    text-align: center; padding: 36px 20px; border-radius: 20px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff; margin-bottom: 20px;
   }
-  .r-emoji { font-size: 80px; display: block; animation: pulse 2s ease-in-out infinite; }
-  .r-code {
-    font-size: 52px;
-    font-weight: 900;
-    letter-spacing: 4px;
-    margin: 6px 0;
-    display: block;
+  .result-hero .r-emoji { font-size: 80px; display: block; }
+  .result-hero .r-type { font-size: 2.6em; font-weight: 900; letter-spacing: 2px; margin: 8px 0; }
+  .result-hero .r-name { font-size: 1.6em; font-weight: 700; color: var(--yellow); }
+  .result-hero .r-tagline { font-size: 0.9em; color: #bbb; margin-top: 4px; font-style: italic; }
+
+  .dim-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .dim-bars { grid-template-columns: 1fr; } }
+  .dim-bar-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .dim-bar-card .dbc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .dim-bar-card .dbc-label { font-size: 0.85em; font-weight: 700; }
+  .dim-bar-card .dbc-result { font-size: 0.8em; color: #888; }
+  .dim-bar-card .dbc-bar { height: 8px; border-radius: 4px; background: #eee; overflow: hidden; }
+  .dim-bar-card .dbc-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.16, 0.68, 0.18, 1.02); }
+
+  .desc-card { background: #fffdf5; border-radius: 14px; padding: 20px 22px; border: 2px dashed var(--yellow); margin-top: 16px; }
+  .desc-card h3 { color: var(--orange); margin-bottom: 8px; }
+  .desc-card p { line-height: 1.8; }
+
+  .metaphor-card { background: #f0f4ff; border-radius: 14px; padding: 18px 22px; margin-top: 12px; text-align: center; }
+  .metaphor-card .m-row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
+  .metaphor-card .m-item { text-align: center; }
+  .metaphor-card .m-item .m-icon { font-size: 2.2em; }
+  .metaphor-card .m-item .m-label { font-size: 0.8em; color: #888; }
+
+  .hidden { display: none !important; }
+
+  /* 装饰小球 */
+  .float-ball {
+    position: fixed; font-size: 28px; pointer-events: none; z-index: 0;
+    animation: floatAround 8s ease-in-out infinite; opacity: 0.5;
   }
-  .r-name {
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--yellow);
-    display: block;
-  }
-  .r-tagline {
-    font-size: 12px;
-    color: var(--muted);
-    font-style: italic;
-    margin-top: 4px;
-    display: block;
+  @keyframes floatAround {
+    0%,100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(30px, -40px) rotate(90deg); }
+    50% { transform: translate(-20px, -80px) rotate(180deg); }
+    75% { transform: translate(-40px, -30px) rotate(270deg); }
   }
 
-  .dim-bars { display: flex; flex-direction: column; gap: 10px; }
-  .dim-bar-item {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 14px 16px;
-    border-left: 4px solid var(--green);
-  }
-  .dim-bar-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .dim-bar-label { font-size: 14px; font-weight: 700; }
-  .dim-bar-result { font-size: 13px; font-weight: 600; }
-  .dim-bar-range {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #666;
-    margin-bottom: 6px;
-  }
-  .dim-bar-track {
-    height: 6px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.08);
-    overflow: hidden;
-  }
-  .dim-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 1.2s cubic-bezier(0.16, 0.68, 0.18, 1.02);
-  }
-
-  .desc-box {
-    background: rgba(241,196,15,0.06);
-    border-radius: 14px;
-    padding: 18px;
-    margin: 14px 0;
-    border: 1px dashed rgba(241,196,15,0.2);
-  }
-  .desc-box h4 { font-size: 16px; color: var(--yellow); margin-bottom: 8px; }
-  .desc-box p { font-size: 14px; line-height: 1.8; color: #ccc; white-space: pre-line; }
-
-  .metaphor-row {
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
-    padding: 10px 0;
-  }
-  .metaphor-item { flex: 1; }
-  .metaphor-item .m-emoji { font-size: 40px; display: block; }
-  .metaphor-item .m-label { font-size: 15px; font-weight: 700; margin: 4px 0; }
-  .metaphor-item .m-note { font-size: 11px; color: var(--muted); }
-
-
-  .share-panel {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: #1a1a2e; border-radius: 20px 20px 0 0;
-    padding: 28px 20px 40px; z-index: 200; animation: fadeInUp 0.3s ease;
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
-  }
-  .share-panel.hidden { display: none; }
-  .share-panel-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 20px; color: #fff; }
-  .share-options { display: flex; justify-content: space-around; gap: 12px; }
-  .share-opt {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 16px 10px; border-radius: 16px; background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1); cursor: pointer; flex: 1;
-  }
-  .share-opt:active { background: rgba(255,255,255,0.12); }
-  .share-opt-icon { font-size: 36px; }
-  .share-opt-label { font-size: 13px; color: #ccc; font-weight: 600; }
-  .share-opt-sub { font-size: 11px; color: #888; }
-  .share-link-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
-  .share-link-input {
-    flex: 1; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12); color: #aaa; font-size: 13px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .share-copy-btn {
-    padding: 10px 18px; border-radius: 10px; background: var(--green);
-    color: #fff; font-weight: 700; font-size: 13px; border: none; cursor: pointer;
-  }
-  .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
-  .share-overlay.hidden { display: none; }
-
-  .celeb-box {
-    text-align: center;
-    padding: 14px;
-    background: var(--card);
-    border-radius: 12px;
-    font-size: 13px;
-    color: var(--muted);
-    margin: 10px 0;
-  }
-  .r-role {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: #f39c12;
-    margin-top: 4px;
-    letter-spacing: 1px;
-  }
-  .star-box { }
-  .star-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    margin: 10px 0;
-  }
-  .star-flag { font-size: 40px; flex-shrink: 0; }
-  .star-info { display: flex; flex-direction: column; gap: 4px; }
-  .star-name { font-size: 18px; font-weight: 700; color: #fff; }
-  .star-reason { font-size: 13px; color: #aaa; line-height: 1.5; }
-  .star-others { font-size: 12px; color: #666; margin-top: 6px; text-align: center; }
-  .match-box { }
-  .match-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .match-row:last-child { border-bottom: none; }
-  .match-badge { font-size: 24px; flex-shrink: 0; width: 32px; text-align: center; }
-  .match-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .match-role { font-size: 11px; color: var(--yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .match-code { font-size: 14px; font-weight: 700; color: #fff; }
-  .match-reason { font-size: 12px; color: #888; line-height: 1.4; }
-  .match-score {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--green);
-    flex-shrink: 0;
-    min-width: 45px;
-    text-align: right;
-  }
-
-  /* 分享区域 */
-  .share-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 0 40px;
-  }
-
-  /* ===== 海报弹窗 ===== */
-  .poster-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease;
-  }
-  .poster-overlay.hidden { display: none; }
-  .poster-close {
-    position: absolute;
-    top: max(20px, var(--safe-top));
-    right: 20px;
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    color: #fff;
-    cursor: pointer;
-    z-index: 2;
-  }
-  .poster-card {
-    width: 300px;
-    background: #1a1a2e;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    position: relative;
-  }
-  .poster-card canvas { display: block; width: 100%; height: auto; }
-  .poster-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-top: 18px;
-  }
-  .poster-actions .btn { width: 280px; height: 48px; font-size: 16px; }
-  .poster-tip { font-size: 12px; color: #666; }
-
-  /* ===== Toast ===== */
-  .toast {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    background: rgba(0,0,0,0.85);
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 24px;
-    font-size: 14px;
-    z-index: 200;
-    animation: fadeIn 0.2s ease;
-    pointer-events: none;
-  }
-  .toast.hidden { display: none; }
-
-  /* ===== 撒花 ===== */
-  .confetti-el {
-    position: fixed;
-    font-size: 28px;
-    pointer-events: none;
-    z-index: 150;
-    animation: confettiDrop 2.5s ease-out forwards;
-  }
-
-  /* ===== 背景粒子 ===== */
-  .bg-particles {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .bg-particle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(46,204,113,0.06);
-    animation: float 7s ease-in-out infinite;
+  .confetti { position: fixed; pointer-events: none; z-index: 999; font-size: 36px; animation: confettiFall 3s ease-out forwards; }
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translateY(-100px) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(110vh) rotate(720deg) scale(0.3); }
   }
 </style>
 </head>
 <body>
 
-<div id="app">
-  <!-- 顶部条 -->
-  <div class="top-bar" id="topBar">
-    <span class="top-bar-title">🎾 网球人格鉴定局</span>
+<div class="float-ball" style="top:8%;left:5%;animation-delay:0s;">🎾</div>
+<div class="float-ball" style="top:20%;right:6%;animation-delay:2.5s;">🎾</div>
+<div class="float-ball" style="bottom:15%;left:7%;animation-delay:5s;">🎾</div>
+
+<div class="container">
+
+  <!-- ==================== 介绍页 ==================== -->
+  <div id="introPage">
+    <div class="hero">
+      <span class="ball">🎾</span>
+      <h1>网球人格鉴定局</h1>
+      <p class="tagline">🔬 专业鉴定你在球场上的真实面目 —— 不保证科学，但保证好笑</p>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <div class="dim-grid">
+        <div class="dim-item">
+          <span class="di-emoji">🎉</span>
+          <span class="di-label">社交模式</span>
+          <span class="di-pair">组局狂魔 vs 独自美丽</span>
+        </div>
+        <div class="dim-item">
+          <span class="di-emoji">⚔️</span>
+          <span class="di-label">战斗风格</span>
+          <span class="di-pair">暴力输出 vs 优雅艺术</span>
+        </div>
+        <div class="dim-item">
+          <span class="di-emoji">🏆</span>
+          <span class="di-label">胜负执念</span>
+          <span class="di-pair">胜负欲爆棚 vs 佛系养生</span>
+        </div>
+        <div class="dim-item">
+          <span class="di-emoji">📋</span>
+          <span class="di-label">训练模式</span>
+          <span class="di-pair">计划狂魔 vs 随缘玩家</span>
+        </div>
+      </div>
+      <p style="color:#888; margin:10px 0;">
+        📝 20道灵魂拷问 · ⏱ 约3分钟 · 🎭 16种球场奇葩人格<br>
+        <small>每道题四个选项，请凭第一直觉作答，思前想后就不准了！</small>
+      </p>
+      <button class="btn btn-go" onclick="start()">🔪 开始解剖自己</button>
+    </div>
   </div>
 
-  <!-- 背景粒子 -->
-  <div class="bg-particles" id="bgParticles"></div>
-
-  <!-- Toast -->
-  <div class="toast hidden" id="toast"></div>
-
-  <!-- ===== 首页 ===== -->
-  <div class="page active" id="introPage">
-    <div class="intro-hero">
-      <span class="intro-ball">🎾</span>
-      <h1 class="intro-title">网球人格鉴定局</h1>
-      <p class="intro-sub">🔬 专业鉴定你在球场上的真实面目</p>
-      <p class="intro-joke">不保证科学，但保证好笑</p>
-    </div>
-
-    <div class="dim-grid">
-      <div class="dim-item"><span class="dim-emoji">🎉</span><span class="dim-label">社交模式</span><span class="dim-pair">组局狂魔 vs 独自美丽</span></div>
-      <div class="dim-item"><span class="dim-emoji">⚔️</span><span class="dim-label">战斗风格</span><span class="dim-pair">暴力输出 vs 优雅艺术</span></div>
-      <div class="dim-item"><span class="dim-emoji">🏆</span><span class="dim-label">胜负执念</span><span class="dim-pair">冠军癌晚期 vs 佛系养生</span></div>
-      <div class="dim-item"><span class="dim-emoji">📋</span><span class="dim-label">训练模式</span><span class="dim-pair">计划狂魔 vs 随缘玩家</span></div>
-    </div>
-
-    <div class="info-card">
-      <p>📝 <span class="highlight">20道</span>灵魂拷问 · ⏱ 约<span class="highlight">3分钟</span></p>
-      <p>🎭 <span class="highlight">16种</span>球场奇葩人格</p>
-      <p>⚔️ 武器 · 🦁 动物 · 🌤️ 天气 比喻</p>
-    </div>
-
-    <button class="btn btn-primary" onclick="startTest()">🔪 开始解剖自己</button>
-    <button class="btn btn-secondary" id="shareIntroBtn" onclick="shareIntro()">📤 邀请球友来测</button>
-  </div>
-
-  <!-- ===== 测试页 ===== -->
-  <div class="page" id="testPage">
-    <div class="test-page-inner">
+  <!-- ==================== 测试页 ==================== -->
+  <div id="testPage" class="hidden">
+    <div class="card">
       <div class="progress-wrap">
-        <div class="progress-info"><span id="progLabel">第 1/20 题</span><span id="progPct">5%</span></div>
+        <div class="progress-label"><span id="progText">第 1/20 题</span><span id="progPct">5%</span></div>
         <div class="progress-track"><div class="progress-fill" id="progFill" style="width:5%"></div></div>
       </div>
-      <div class="q-card" id="qCard"></div>
+      <div id="qContainer"></div>
       <div class="nav-row">
-        <button class="nav-btn" id="prevBtn" onclick="prevQ()" disabled>← 上一题</button>
-        <div class="nav-dots" id="navDots"></div>
-        <button class="nav-btn next-btn" id="nextBtn" onclick="nextQ()" disabled>下一题 →</button>
+        <button class="btn btn-nav" id="prevBtn" onclick="prev()">⬅ 上一题</button>
+        <div class="q-dots" id="qDots"></div>
+        <button class="btn btn-nav" id="nextBtn" onclick="next()" disabled>下一题 ➡</button>
       </div>
     </div>
   </div>
 
-  <!-- ===== 结果页 ===== -->
-  <div class="page" id="resultPage">
-    <div id="resultContent"></div>
-    <div class="share-section">
-      <button class="btn btn-primary" onclick="showPoster()">📸 生成分享卡片</button>
-      <button class="btn btn-secondary" id="shareResultBtn" onclick="shareResult()">📤 分享给球友</button>
-      <button class="btn btn-secondary" onclick="restart()">🔄 再测一次</button>
-    </div>
+  <!-- ==================== 结果页 ==================== -->
+  <div id="resultPage" class="hidden">
+    <div class="result-wrap" id="resultWrap"></div>
+    <button class="btn btn-restart" onclick="restart()">🔄 再测一次！（结果会变吗？）</button>
   </div>
 
-  <!-- ===== 海报弹窗 ===== -->
-  <div class="poster-overlay hidden" id="posterOverlay" onclick="hidePoster(event)">
-    <span class="poster-close" onclick="hidePoster()">✕</span>
-    <div class="poster-card" id="posterCard">
-      <canvas id="posterCanvas" width="600" height="860"></canvas>
-    </div>
-    <div class="poster-actions">
-      <button class="btn btn-primary" onclick="savePoster()">💾 保存图片</button>
-      <span class="poster-tip">长按卡片也可保存 · 发朋友圈必备</span>
-    </div>
-  </div>
 </div>
 
-<script src="data.js"></script>
 <script>
-// ==================== 程序逻辑 ====================
+// ===================== 数据 =====================
 
-// ==================== 状态 ====================
-let currentQ = 0;
-let scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
-let answers = new Array(QS.length).fill(null);
-let touchStartX = 0;
-let touchStartY = 0;
-let currentResultCode = '';
-let currentResultData = null;
+const dims = [
+  { id: 'dim1', name: '社交模式', left: 'E', right: 'I',
+    leftName: '组局狂魔（E）', rightName: '独自美丽（I）',
+    lDesc: '球场上到处是你的熟人，群里@全员的那个人就是你', rDesc: '一个人来，一个人打，一个人走，安静且高效',
+    color: '#e74c3c' },
+  { id: 'dim2', name: '战斗风格', left: 'B', right: 'T',
+    leftName: '暴力输出（B）', rightName: '优雅艺术（T）',
+    lDesc: '每一拍都在和球有仇，大力出奇迹是你的座右铭', rDesc: '旋转、落点、节奏变化，网球在你手里是一门艺术',
+    color: '#e67e22' },
+  { id: 'dim3', name: '胜负执念', left: 'C', right: 'F',
+    leftName: '冠军癌晚期（C）', rightName: '佛系养生（F）',
+    lDesc: '输球能让你难受三天，记分牌比心跳还重要', rDesc: '输赢随缘，出汗就行，打完球去撸串才是正事',
+    color: '#2ecc71' },
+  { id: 'dim4', name: '训练模式', left: 'P', right: 'R',
+    leftName: '计划狂魔（P）', rightName: '随缘玩家（R）',
+    lDesc: '每周训练计划精确到分钟，下雨？室内练！', rDesc: '打球？看心情，看天气，看黄历，看星座运势',
+    color: '#3498db' }
+];
 
-// ==================== 页面切换 ====================
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) { el.classList.add('active'); el.scrollTop = 0; }
+const questions = [
+  // ========== 维度1：社交模式 (5题) ==========
+  { dim: 'dim1', text: '周五下午，群里有人吼了一声"明早9点打球！"，你的第一反应是？', opts: [
+    { emoji: '🔥', text: '秒回"11111"并开始规划明天穿哪套球衣', score: {dim1: 3} },
+    { emoji: '👍', text: '回复"好的"然后默默把闹钟调到8点半', score: {dim1: 1} },
+    { emoji: '🤔', text: '先看看都有谁去，人不对就说"哎呀明天有事"', score: {dim1: -1} },
+    { emoji: '🙈', text: '装作没看见，明天睡到自然醒它不香吗', score: {dim1: -3} }
+  ]},
+  { dim: 'dim1', text: '你是那种会主动在朋友圈/群里喊人约球的人吗？', opts: [
+    { emoji: '📢', text: '是我！群里的"球局发起人"称号不是白来的', score: {dim1: 3} },
+    { emoji: '🤝', text: '偶尔会，但主要是熟人圈子里张罗', score: {dim1: 1} },
+    { emoji: '📩', text: '基本不主动，但别人喊我一般都会去', score: {dim1: -1} },
+    { emoji: '🏠', text: '约球？不如在家躺着。能单约绝不群发', score: {dim1: -3} }
+  ]},
+  { dim: 'dim1', text: '你对目前找球友/约球的整体感受是什么？', opts: [
+    { emoji: '😤', text: '心累！找球友像大海捞针，约10次成1次', score: {dim1: 3} },
+    { emoji: '😅', text: '还行吧，偶尔麻烦但能接受，凑合着打', score: {dim1: 1} },
+    { emoji: '🙂', text: '挺顺利的，有固定圈子，不太需要找新人', score: {dim1: -1} },
+    { emoji: '🤷', text: '无所谓。有人约就去，没人就自己练', score: {dim1: -3} }
+  ]},
+  { dim: 'dim1', text: '你理想中的球友是什么水平？', opts: [
+    { emoji: '💀', text: '比我强两个档次！被虐才有进步，被暴打是最高礼遇', score: {dim1: 3} },
+    { emoji: '⚖️', text: '差不多就行，势均力敌最好玩', score: {dim1: 1} },
+    { emoji: '😎', text: '稍微比我弱一点点的…可以享受赢的快感', score: {dim1: -1} },
+    { emoji: '🐣', text: '只要人品好、不鸽我，水平无所谓', score: {dim1: -3} }
+  ]},
+  { dim: 'dim1', text: '你在约球/找球友过程中遇到过最烦人的情况是？', opts: [
+    { emoji: '🕊️', text: '被放鸽子！说好的局说没就没，白白浪费一个下午', score: {dim1: 3} },
+    { emoji: '👻', text: '水平差距太大。报了3.0实际1.5，两边都尴尬', score: {dim1: 1} },
+    { emoji: '🐂', text: '遇到黄牛/二道贩子。场地被加价倒卖，约球帖是钓鱼的', score: {dim1: -1} },
+    { emoji: '💬', text: '沟通太累。确定时间/地点/人数要来回几十条消息', score: {dim1: -3} }
+  ]},
+
+  // ========== 维度2：战斗风格 (5题) ==========
+  { dim: 'dim2', text: '比赛到30-30的关键分，你准备发球，脑子里想的是？', opts: [
+    { emoji: '💣', text: '一发全力轰出去！不进算我的，进了算你的（输了）', score: {dim2: 3} },
+    { emoji: '⚡', text: '八成力发个平击，先压制住，下一拍再解决', score: {dim2: 1} },
+    { emoji: '🌀', text: '发个带切的外角球把对手拉出场外，然后上网截击', score: {dim2: -1} },
+    { emoji: '🪄', text: '发个下手发球…谁说下手发球不能得分？（坏笑）', score: {dim2: -3} }
+  ]},
+  { dim: 'dim2', text: '最能描述你球风的是？', opts: [
+    { emoji: '🦍', text: '底线猛男/女：站定了往死里抽，对手不跑吐算我输', score: {dim2: 3} },
+    { emoji: '🐆', text: '进攻型全能：主要靠速度和力量压迫，偶尔变节奏', score: {dim2: 1} },
+    { emoji: '🦊', text: '节奏大师：切削、高球、平击、上旋不停切换', score: {dim2: -1} },
+    { emoji: '🐍', text: '防守反击型：磨到对手怀疑人生然后一击致命', score: {dim2: -3} }
+  ]},
+  { dim: 'dim2', text: '网球技术上，最让你头疼/卡住的地方是？', opts: [
+    { emoji: '💥', text: '稳定性差。暴力是够了，但出界率也感人，经常自己打飞', score: {dim2: 3} },
+    { emoji: '🐌', text: '速度和力量上不去。想加力但一加就失误，很憋屈', score: {dim2: 1} },
+    { emoji: '🎯', text: '落点不够精准。脑子里想打角落，手上打中路', score: {dim2: -1} },
+    { emoji: '🧊', text: '比赛中心态崩。训练猛如虎，一打比赛就手抖脚软', score: {dim2: -3} }
+  ]},
+  { dim: 'dim2', text: '如果网球之神给你一个技能点，你加在哪儿？', opts: [
+    { emoji: '🚀', text: '发球速度+50%！150km/h是底线，200km/h是追求', score: {dim2: 3} },
+    { emoji: '💪', text: '正手力量+50%！一板下去，球上能冒烟', score: {dim2: 1} },
+    { emoji: '🎨', text: '球感+50%！放小球、挑高球、穿越球…怎么骚怎么来', score: {dim2: -1} },
+    { emoji: '🧠', text: '战术智商+50%！我就是网球诸葛亮', score: {dim2: -3} }
+  ]},
+  { dim: 'dim2', text: '关于提升技术，你目前最大的困扰是？', opts: [
+    { emoji: '💸', text: '请教练太贵了。好教练一小时几百块，顶一周场地费', score: {dim2: 3} },
+    { emoji: '🎯', text: '找不到合适的陪练。想练多球/对抗，没合适水平的人', score: {dim2: 1} },
+    { emoji: '📹', text: '不知道自己的问题在哪。没人帮忙看动作、纠正错误', score: {dim2: -1} },
+    { emoji: '📚', text: '网上教程太杂了。学了反而更乱，不知道哪个靠谱', score: {dim2: -3} }
+  ]},
+
+  // ========== 维度3：胜负执念 (5题) ==========
+  { dim: 'dim3', text: '输给一个你觉得不该输的对手后，你的心理状态是？', opts: [
+    { emoji: '😡', text: '愤怒复盘三小时：第3局第2分不该那样打！今晚睡不着了', score: {dim3: 3} },
+    { emoji: '😤', text: '闷闷不乐半小时，备忘录写下"下周必须报仇"', score: {dim3: 1} },
+    { emoji: '😅', text: '"没事没事今天状态不好"——嘴上这么说，心里有点小不爽', score: {dim3: -1} },
+    { emoji: '😌', text: '"今天天气不错，输了也出汗了，血赚！"真诚地这么想', score: {dim3: -3} }
+  ]},
+  { dim: 'dim3', text: '关于球拍/球线/手胶/球鞋，你属于哪类人？', opts: [
+    { emoji: '🔬', text: '装备极客：能跟你讲一小时聚酯线和羊肠线的区别', score: {dim3: 3} },
+    { emoji: '🔧', text: '实用玩家：研究过，选了一套适合自己的，知道参数', score: {dim3: 1} },
+    { emoji: '🛒', text: '差不多先生/女士：淘宝搜"网球拍 好评"买的', score: {dim3: -1} },
+    { emoji: '🤷', text: '能用就行：拍子朋友淘汰的，线断了才穿，鞋磨平才换', score: {dim3: -3} }
+  ]},
+  { dim: 'dim3', text: '你每年在网球上的花费，内心OS是？', opts: [
+    { emoji: '💰', text: '"投资自己！"装备+教练+场地…一年五位数起步', score: {dim3: 3} },
+    { emoji: '💳', text: '"合理消费"——该花的花，但不会为了网球吃土', score: {dim3: 1} },
+    { emoji: '🤑', text: '"打网球好贵啊…"每次续场地费都要心理建设一番', score: {dim3: -1} },
+    { emoji: '🧮', text: '"免费球场不香吗？"到处找免费/低价场地，球打秃了才换', score: {dim3: -3} }
+  ]},
+  { dim: 'dim3', text: '打比赛/对战时，最影响你体验的是？', opts: [
+    { emoji: '😤', text: '对手耍赖/乱报比分。认真比赛的人遇到瞎搞的，心态直接炸', score: {dim3: 3} },
+    { emoji: '🐢', text: '对手节奏太慢。每次发球拍20下球，拖到天荒地老', score: {dim3: 1} },
+    { emoji: '🦁', text: '被暴打。对手太强，全程捡球，毫无还手之力像陪练', score: {dim3: -1} },
+    { emoji: '🧸', text: '虐菜无聊。对手太弱，打着打着就想玩手机', score: {dim3: -3} }
+  ]},
+  { dim: 'dim3', text: '你和球友之间最容易因为什么产生不愉快？', opts: [
+    { emoji: '⚔️', text: '对输赢的态度不一致。我很认真，他觉得玩玩而已', score: {dim3: 3} },
+    { emoji: '📏', text: '对规则的理解不同。压线算不算出界能争十分钟', score: {dim3: 1} },
+    { emoji: '👻', text: '他老是临时取消。约好的局说鸽就鸽，还每次都理直气壮', score: {dim3: -1} },
+    { emoji: '🗣️', text: '他在场上太吵了。每打一拍都要嗷嗷叫，像在打WWE', score: {dim3: -3} }
+  ]},
+
+  // ========== 维度4：训练模式 (5题) ==========
+  { dim: 'dim4', text: '你决定"今天去打球"的最大驱动力是？', opts: [
+    { emoji: '📋', text: '计划到了。每周固定几天是打球日，跟上班一样不能翘', score: {dim4: 3} },
+    { emoji: '🔋', text: '想活动活动。这周还没运动过，罪恶感驱动', score: {dim4: 1} },
+    { emoji: '📲', text: '有人约了。朋友来问，刚好有空，那就去吧', score: {dim4: -1} },
+    { emoji: '🌤️', text: '看心情/天气/星座。天时地利人和都凑齐了才会出门', score: {dim4: -3} }
+  ]},
+  { dim: 'dim4', text: '关于订网球场地，你的真实体验是？', opts: [
+    { emoji: '📅', text: '提前一周设闹钟抢。热门时段秒没，抢到算我赚到', score: {dim4: 3} },
+    { emoji: '🗓️', text: '提前几天订。有时能订到有时不行，看运气', score: {dim4: 1} },
+    { emoji: '🔍', text: '临时找。出发前搜一下哪个场有空，不行就换运动', score: {dim4: -1} },
+    { emoji: '🤷', text: '从来不自己订。都是别人订好了叫我，我不知道怎么订', score: {dim4: -3} }
+  ]},
+  { dim: 'dim4', text: '阻碍你定期系统性训练（找教练/上培训课）的最大因素是？', opts: [
+    { emoji: '💰', text: '太贵了。好教练300-800/h，长期学是一笔不小开销', score: {dim4: 3} },
+    { emoji: '⏰', text: '没时间。工作日搬砖，周末只想放松，没精力上课', score: {dim4: 1} },
+    { emoji: '🤔', text: '不知道去哪找好教练。网上信息杂，怕踩雷花冤枉钱', score: {dim4: -1} },
+    { emoji: '😅', text: '觉得没必要。我又不是要打职业，自己瞎打打挺好', score: {dim4: -3} }
+  ]},
+  { dim: 'dim4', text: '上场前你会热身吗？', opts: [
+    { emoji: '🏋️', text: '仪式感拉满：拉伸+慢跑+激活+对拉，30分钟起步', score: {dim4: 3} },
+    { emoji: '🤸', text: '基础热身：简单拉伸，对拉几个球活动开，10分钟', score: {dim4: 1} },
+    { emoji: '⚡', text: '极简主义：原地蹦两下，甩甩胳膊，好了开始吧', score: {dim4: -1} },
+    { emoji: '🏃', text: '热身是什么？上来就抡！受伤？（直到拉伤那天）', score: {dim4: -3} }
+  ]},
+  { dim: 'dim4', text: '如果有一个APP能解决你网球生活中的一个问题，你最希望它解决什么？', opts: [
+    { emoji: '🔍', text: '智能匹配球友：根据水平、性格、位置自动推荐合适的搭子', score: {dim4: 3} },
+    { emoji: '🤖', text: '自动约球：跟它说"周六下午想打球"，剩下它全搞定', score: {dim4: 1} },
+    { emoji: '🛡️', text: '信用担保：再也不怕被放鸽子，放鸽子的人有代价', score: {dim4: -1} },
+    { emoji: '🏟️', text: '场地秒订：不用跟黄牛抢，公平透明地订到场地', score: {dim4: -3} }
+  ]}
+];
+
+// ===================== 类型描述库 =====================
+const typeDB = {
+  'EBCP': {
+    code: 'EBCP', name: '雷霆战神', title: '社交悍匪 · 暴力狂魔 · 冠军偏执狂 · 计划机器人',
+    emoji: '⚡',
+    desc: '你是球场上的雷神下凡！群里喊人最积极的是你，正手暴力抽击的是你，输了彻夜难眠的是你，训练日程精确到分钟的还是你。你就像一个行走的网球核弹——社交圈炸、底线炸、比分炸、训练也炸。别人打球是爱好，你打球是使命。',
+    advice: '你是冠军的料子！不过偶尔也放松一下吧，别把小区友谊赛当大满贯决赛打。还有，输一次真的不会死。',
+    weapons: { emoji: '🔨', label: '雷神之锤', note: '一击必杀，神挡杀神' },
+    animal: { emoji: '🦁', label: '草原雄狮', note: '王者气场，不可一世' },
+    weather: { emoji: '⛈️', label: '雷暴天气', note: '来势汹汹，惊天动地' },
+    celeb: '纳达尔的斗志 + 德约的纪律 + 一点点伊布的狂妄'
+  },
+  'EBTP': {
+    code: 'EBTP', name: '暴风骑士', title: '社交达人 · 暴力美学 · 佛系随缘 · 计划控',
+    emoji: '🌪️',
+    desc: '你是一位活在朋友圈里的暴力美学大师！爱约球、爱社交、正手能打死牛，但内心却出奇地佛系——输了无所谓，赢了更开心。关键是你居然还做训练计划？这个组合就像暴风雨中带着一把刻度尺：看起来很猛，其实很有分寸。',
+    advice: '你的性格组合很稀有！社交的温暖中和了暴力的冷酷。保持这种快乐网球的态度，你已经赢了。',
+    weapons: { emoji: '⚔️', label: '风暴之剑', note: '狂风骤雨，横扫千军' },
+    animal: { emoji: '🐎', label: '战马', note: '勇猛而忠诚，团队核心' },
+    weather: { emoji: '🌬️', label: '狂风', note: '来去匆匆，酣畅淋漓' },
+    celeb: '克耶高斯的激情 + 巴蒂的佛系 + 费德勒的优雅'
+  },
+  'EBCR': {
+    code: 'EBCR', name: '狂野犀牛', title: '社交核心 · 暴力猛男 · 胜负欲拉满 · 随缘球王',
+    emoji: '🦏',
+    desc: '你是球场上的社交暴力分子！喊人打球你最积极，上了场就跟开了狂暴一样猛冲猛打，输了能难受一整天。但你居然完全没有训练计划？约到就打，约不到就鸽——这很矛盾啊兄弟！就像一个没有刹车的跑车，快是真快，但去哪全靠心情。',
+    advice: '天赋型选手！你的力量是优势，但稍微加点系统性训练就能起飞。建议找一个教练朋友，让他对你进行"软性指导"。',
+    weapons: { emoji: '🪓', label: '狂暴战斧', note: '不讲究招式，抡就完了' },
+    animal: { emoji: '🦏', label: '犀牛', note: '横冲直撞，无所畏惧' },
+    weather: { emoji: '🌋', label: '火山爆发', note: '平时安静，一喷惊天' },
+    celeb: '孟菲尔斯的天赋 + 德尔波特罗的正手 + 萨芬的随性'
+  },
+  'EBTR': {
+    code: 'EBTR', name: '荒原闪电', title: '社交达人 · 暴力打法 · 佛系心态 · 随缘模式',
+    emoji: '⚡',
+    desc: '你是网球场上的快乐哈士奇！约局你最积极，打球猛如虎，但内心住着一只完全不在乎输赢的佛系猫。没有训练计划？不存在的——"计划"这个词跟你的人生毫无关系。你就是纯粹的网球快乐兽：喊人、暴扣、大笑、走人。',
+    advice: '你是球友圈里的气氛担当！保持你的快乐感染力。如果想提升技术，从"偶尔找教练上节课"开始，不用逼自己做计划。',
+    weapons: { emoji: '🎆', label: '烟花弹', note: '绚烂热闹，快乐至上' },
+    animal: { emoji: '🐕', label: '哈士奇', note: '热情奔放，拆家式打法' },
+    weather: { emoji: '☀️', label: '晴天霹雳', note: '欢乐中突然来一记暴击' },
+    celeb: '布沙尔的自由 + 莫亚的力量 + 一只喝了咖啡的金毛'
+  },
+  'EFCP': {
+    code: 'EFCP', name: '寒冰狙击', title: '社交达人 · 技术流 · 冠军癌 · 计划控',
+    emoji: '🎯',
+    desc: '你是球场上的冷面狙击手！约球你积极组局，但一上场你就进入"杀手模式"——每一拍都经过精确计算，每一个落点都像尺子量过的。你对装备的研究已经到了令人发指的地步，你的训练计划比公司的KPI还精细。球友们敬畏你，对手害怕你。',
+    advice: '你的精确和自律令人叹服。但别忘了网球还有一个叫"快乐"的东西。偶尔关掉脑子，让身体自由挥几拍。',
+    weapons: { emoji: '🏹', label: '复合弓', note: '百步穿杨，弹无虚发' },
+    animal: { emoji: '🦅', label: '猎鹰', note: '高空盘旋，精准猎杀' },
+    weather: { emoji: '❄️', label: '极地寒流', note: '冷静致命，寒气逼人' },
+    celeb: '费德勒的优雅 + 辛吉斯的球商 + 梅德韦杰夫的冷酷'
+  },
+  'EFTP': {
+    code: 'EFTP', name: '灵狐诗人', title: '社交核心 · 艺术球风 · 佛系心态 · 计划达人',
+    emoji: '🦊',
+    desc: '你是网球圈里的文艺青年！约球你张罗，球风你优雅，输赢你不在乎，但居然有训练计划？你就像一个会写诗的程序员——理性框架下藏着浪漫的灵魂。你的网球与其说是运动，不如说是一场行为艺术。球友们说看你打球像是在看芭蕾舞。',
+    advice: '你已经达到了网球的一种高级境界。但偶尔参加一些正式比赛，把你的艺术带到更大的舞台！',
+    weapons: { emoji: '🪄', label: '魔法杖', note: '不靠蛮力，全靠想象力' },
+    animal: { emoji: '🦊', label: '银狐', note: '聪慧灵动，优雅自如' },
+    weather: { emoji: '🌈', label: '雨后彩虹', note: '温柔绚丽，让人愉悦' },
+    celeb: '拉德万斯卡的灵巧 + 阿加西的触感 + 辛纳的冷静'
+  },
+  'EFCR': {
+    code: 'EFCR', name: '灵动蜂鸟', title: '社交达人 · 技术派 · 胜负执着 · 随缘玩家',
+    emoji: '🐦',
+    desc: '你是球场上一个美丽的矛盾体！社交圈你混得开，技术细腻像绣花针，赢了开心输了不甘——但你就是不做训练计划。你就像一个考试前不复习但每次都考得不错的学生，全靠灵性和天赋。球友们既羡慕你的球感，又对你的散漫感到不可思议。',
+    advice: '你的天赋和社交能力都很棒。稍微加一点训练规划，你会变得非常恐怖。试试每周固定一天"技术日"？',
+    weapons: { emoji: '🗡️', label: '细剑', note: '灵巧精准，以巧破力' },
+    animal: { emoji: '🐦', label: '蜂鸟', note: '小巧灵动，反应神速' },
+    weather: { emoji: '🍃', label: '春风', note: '温暖和煦中藏着灵动' },
+    celeb: '西西帕斯的创造力 + 蒂姆的随性 + 科贝尔的韧性'
+  },
+  'EFTR': {
+    code: 'EFTR', name: '快乐海豚', title: '社交达人 · 艺术大师 · 佛系之王 · 随缘之神',
+    emoji: '🐬',
+    desc: '你是球场上最快乐的那条海豚！约球你来张罗，打球充满创造力，输赢完全不care，训练计划是什么能吃吗？你把网球的"玩"字发挥到了极致——球到你手里就有了魔法，快乐在你身边就有了传染力。和你打球的人都会不自觉地笑起来。',
+    advice: '你可能是16种类型里最开心的那一个！保持这份纯真。如果哪天想认真一把，记得你还有隐藏的技术天赋没开发呢。',
+    weapons: { emoji: '🎈', label: '欢乐气球', note: '不伤人，只传递快乐' },
+    animal: { emoji: '🐬', label: '海豚', note: '聪明爱玩，人见人爱' },
+    weather: { emoji: '🌤️', label: '晴间多云', note: '舒适宜人，偶有惊喜' },
+    celeb: '巴蒂的淡然 + 桑托罗的诡计 + 一只快乐的小狗'
+  },
+  'IBCP': {
+    code: 'IBCP', name: '孤狼之牙', title: '社交隐士 · 暴力重炮 · 冠军偏执狂 · 计划狂人',
+    emoji: '🐺',
+    desc: '你是那种独自一人在球场练到天黑的神秘人。不爱说话、不爱组局，但一拿起球拍就仿佛换了一个人。正手暴击像炮弹，训练计划像瑞士钟表，输了能让自己加练三小时。别人觉得你高冷难接近，但只有你自己知道——你只是把所有的热情都留给了网球。',
+    advice: '你的专注和自律是顶级品质。不过偶尔向球友敞开心扉，你会发现社交也是网球的一大乐趣。找个水平相当的人一起练，效果翻倍。',
+    weapons: { emoji: '🗡️', label: '暗影之刃', note: '无声无息，一击毙命' },
+    animal: { emoji: '🐺', label: '孤狼', note: '独来独往，战力爆表' },
+    weather: { emoji: '🌑', label: '月黑风高', note: '沉默、危险、致命' },
+    celeb: '梅德韦杰夫的冷酷 + 施瓦茨曼的坚韧 + 瓦林卡的专注'
+  },
+  'IBTP': {
+    code: 'IBTP', name: '暗影刺客', title: '独行侠 · 暴力美学 · 佛系心态 · 计划控',
+    emoji: '🥷',
+    desc: '你是球场上最像刺客的存在！不声张、不组局、不争辩——但你的暴力正手会让对手记住很久。你明明有训练计划却不在乎输赢，这意味着你训练纯粹是因为喜欢。你像一个独自练剑的武林高手，不为江湖排名，只为剑法的精进。',
+    advice: '你的心态很棒！但偶尔走出舒适圈，参加一些比赛或者约一些新球友，会有不一样的收获。',
+    weapons: { emoji: '🗡️', label: '忍者刀', note: '快、准、狠，事了拂衣去' },
+    animal: { emoji: '🐆', label: '黑豹', note: '优雅、迅捷、难以捉摸' },
+    weather: { emoji: '🌫️', label: '晨雾', note: '神出鬼没，来去无踪' },
+    celeb: '卡洛维奇的发球 + 锦织圭的打磨 + 一个沉默的忍者'
+  },
+  'IBCR': {
+    code: 'IBCR', name: '独行野猪', title: '孤僻强者 · 暴力莽夫 · 胜负欲拉满 · 随缘之王',
+    emoji: '🐗',
+    desc: '你是球场上最难以捉摸的存在！不约人、不计划，但只要站上球场就跟开了狂暴模式的野猪一样横冲直撞。你特别想赢，但你没有计划——这就像一个没有导航的赛车手，全凭直觉在莽。经常输得莫名其妙，赢也赢得稀里糊涂。但你不在乎，你要的是那种挥拍的快感。',
+    advice: '你的野性力量很宝贵。找一个教练或高手朋友，哪怕每月一次，他帮你指点一下就能让你少走很多弯路。',
+    weapons: { emoji: '🔧', label: '狼牙棒', note: '不精致但很管用' },
+    animal: { emoji: '🐗', label: '野猪', note: '横冲直撞，势不可挡' },
+    weather: { emoji: '🌪️', label: '沙尘暴', note: '混乱狂暴，方向全靠蒙' },
+    celeb: '伊万尼塞维奇的发球 + 萨芬的个性 + 一只愤怒的犀牛'
+  },
+  'IBTR': {
+    code: 'IBTR', name: '沙漠仙人掌', title: '独行侠 · 暴力狠人 · 佛系心态 · 随缘到底',
+    emoji: '🌵',
+    desc: '你是网球世界里的独行仙人掌——不依赖任何人，不需要频繁浇水（训练），但只要逮到机会就猛扎对手一身刺。你的暴力打法没有预兆、没有计划、没有社交预热，就像沙漠里的暴晒突然来一记雷劈。你完全不在意胜负，但你每次挥拍都莫名其妙地有杀伤力。',
+    advice: '你的独立性是优势，但长期不训练手感会退化。保持一个底线频率，哪怕每月打两次，你的"刺"会更锋利。',
+    weapons: { emoji: '🌵', label: '仙人掌', note: '不主动攻击，但碰一下叫你后悔' },
+    animal: { emoji: '🦂', label: '蝎子', note: '独居沙漠，一击致命' },
+    weather: { emoji: '🏜️', label: '沙漠热浪', note: '平时安静，爆发时热浪滚滚' },
+    celeb: '德尔波特罗的暴力正手 + 克耶高斯的随性 + 沙漠里的孤胆英雄'
+  },
+  'IFCP': {
+    code: 'IFCP', name: '暗影蝰蛇', title: '社交回避 · 技术毒蛇 · 胜负偏执 · 计划周密',
+    emoji: '🐍',
+    desc: '你是球场上最冷静的猎手。不跟人社交，但你的技术比所有人都细腻。你像一条埋伏在草丛里的蝰蛇——安静、耐心、精确，一旦发现对手弱点就死死咬住不放。你有详细的训练计划，从来不鸽自己。别人觉得你神秘，其实你只是觉得网球比人有趣。',
+    advice: '你的技术和战术素养已经很高了。但网球也是社交运动，偶尔约个球友一起训练，会让你在战术层面获得新视角。',
+    weapons: { emoji: '🏹', label: '淬毒弩箭', note: '一击中的，后劲无穷' },
+    animal: { emoji: '🐍', label: '黑曼巴蛇', note: '冷静克制，致命高效' },
+    weather: { emoji: '🌧️', label: '连绵阴雨', note: '不动声色地消磨对手意志' },
+    celeb: '穆雷的战术 + 哈勒普的韧性 + 一个下棋的人工智能'
+  },
+  'IFTP': {
+    code: 'IFTP', name: '冰川隐士', title: '独来独往 · 技术大师 · 佛系心态 · 计划严谨',
+    emoji: '🏔️',
+    desc: '你就像一个隐居在雪山之巅的武学大师——不与世争，但技术炉火纯青。你独自练习、独自进步、独自享受。你有训练计划但不在乎比赛结果，意味着你追求的是网球本身而不是输赢。这是一种很高的境界，很多人一辈子都达不到。',
+    advice: '你对网球的纯粹追求令人尊敬。偶尔下山参加个比赛，让你的技术被更多人看见。顺便说，你的球友可能都在找你——去露个脸吧！',
+    weapons: { emoji: '❄️', label: '冰霜之刃', note: '寒意凛然，清冷致命' },
+    animal: { emoji: '🦉', label: '雪鸮', note: '静观世界，一击必中' },
+    weather: { emoji: '🏔️', label: '高山冰雪', note: '高冷圣洁，不可侵犯' },
+    celeb: '费德勒的优雅 + 巴蒂的淡泊 + 喜马拉雅的修行者'
+  },
+  'IFCR': {
+    code: 'IFCR', name: '沉默山猫', title: '安静独立 · 技术猎人 · 胜负执着 · 随缘行事',
+    emoji: '🐱',
+    desc: '你是球场上一只神秘的山猫。不爱说话不爱组局，但技术精湛得像狩猎多年的老手。你嘴上说着"随便打打"，其实内心贼想赢。你没有训练计划——全靠天赋和直觉。这就像一个从来不复习但每次考试都想拿第一的学生，执念和散漫在体内疯狂打架。',
+    advice: '承认吧，你其实很想赢！那就别装了，制定一个简单的训练计划，你的技术加上自律会让你变得不可战胜。',
+    weapons: { emoji: '🔪', label: '猎刀', note: '朴实无华但招招致命' },
+    animal: { emoji: '🐱', label: '山猫', note: '独居山林，猎杀无声' },
+    weather: { emoji: '🌲', label: '森林迷雾', note: '捉摸不透，暗藏杀机' },
+    celeb: '蒂姆的从容 + 锦织圭的坚韧 + 一只口是心非的猫'
+  },
+  'IFTR': {
+    code: 'IFTR', name: '竹林清风', title: '隐世高人 · 艺术球风 · 绝对佛系 · 随遇而安',
+    emoji: '🍃',
+    desc: '你是网球界的世外高人。从不主动约球，从不制定计划，从不计较输赢。但当你不经意间站上球场，所有人都被你优雅的技术征服。你打球不是为了给别人看，也不是为了赢——你只是因为喜欢那个完美的击球声音。你就像竹林里的一阵清风，来去无痕，却让人心旷神怡。',
+    advice: '你已经摸到了网球哲学的终极形态。保持这份纯粹。如果哪天需要"入世"，你的技术储备足够支撑你在任何比赛中发光。',
+    weapons: { emoji: '🎋', label: '竹笛', note: '以柔克刚，以静制动' },
+    animal: { emoji: '🦌', label: '林间鹿', note: '优雅宁静，与世无争' },
+    weather: { emoji: '🍂', label: '秋日微风', note: '淡然从容，岁月静好' },
+    celeb: '科维托娃的纯粹 + 拉德万斯卡的优雅 + 一位隐居山林的禅师'
+  }
+};
+
+// ===================== 应用 =====================
+let curQ = 0;
+let scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
+let answers = new Array(questions.length).fill(null);
+
+function start() {
+  document.getElementById('introPage').classList.add('hidden');
+  document.getElementById('testPage').classList.remove('hidden');
+  document.getElementById('resultPage').classList.add('hidden');
+  curQ = 0; scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
+  answers = new Array(questions.length).fill(null);
+  renderQContainer();
+  showQ(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==================== 背景粒子 ====================
-function initParticles() {
-  const container = document.getElementById('bgParticles');
-  for (let i = 0; i < 25; i++) {
-    const p = document.createElement('div');
-    p.className = 'bg-particle';
-    const size = 20 + Math.random() * 80;
-    p.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%; top:${Math.random()*100}%;
-      animation-delay:${Math.random()*7}s;
-      animation-duration:${6+Math.random()*8}s;
-    `;
-    container.appendChild(p);
+function renderQContainer() {
+  const c = document.getElementById('qContainer');
+  c.innerHTML = questions.map((q, i) => `
+    <div class="q-slide" id="slide${i}">
+      <span class="q-badge">📋 第 ${i+1} 题 / ${questions.length}</span>
+      <div class="q-title">${q.text}</div>
+      <div class="opts">
+        ${q.opts.map((o, oi) => `
+          <button class="opt-btn" id="opt${i}_${oi}" onclick="pick(${i},${oi})">
+            <span class="opt-emoji">${o.emoji}</span>
+            <span>${o.text}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // 题号小圆点
+  const dots = document.getElementById('qDots');
+  dots.innerHTML = questions.map((_, i) => `<span class="q-dot" id="dot${i}"></span>`).join('');
+}
+
+function showQ(i) {
+  document.querySelectorAll('.q-slide').forEach(s => s.classList.remove('active'));
+  document.getElementById('slide' + i)?.classList.add('active');
+  document.getElementById('progText').textContent = `第 ${i+1}/${questions.length} 题`;
+  document.getElementById('progPct').textContent = Math.round((i+1)/questions.length*100) + '%';
+  document.getElementById('progFill').style.width = ((i+1)/questions.length*100) + '%';
+
+  document.getElementById('prevBtn').disabled = (i === 0);
+  document.getElementById('nextBtn').textContent = i === questions.length-1 ? '🎉 看结果！' : '下一题 ➡';
+  document.getElementById('nextBtn').disabled = answers[i] === null;
+
+  // 更新小圆点
+  document.querySelectorAll('.q-dot').forEach((d, di) => {
+    d.classList.remove('done', 'current');
+    if (answers[di] !== null) d.classList.add('done');
+    if (di === i) d.classList.add('current');
+  });
+
+  // 恢复选项高亮
+  if (answers[i] !== null) {
+    questions[i].opts.forEach((_, oi) => {
+      document.getElementById(`opt${i}_${oi}`)?.classList.toggle('selected', oi === answers[i]);
+    });
   }
 }
 
-// ==================== Toast ====================
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.add('hidden'), 1800);
+function pick(qi, oi) {
+  answers[qi] = oi;
+  questions[qi].opts.forEach((_, oi2) => {
+    document.getElementById(`opt${qi}_${oi2}`)?.classList.toggle('selected', oi2 === oi);
+  });
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById(`dot${qi}`)?.classList.add('done');
+  // 选中选项后自动进入下一题
+  var isLast = qi === questions.length - 1;
+  setTimeout(function() {
+    if (isLast) { calcResult(); return; }
+    curQ++; showQ(curQ);
+  }, 350);
 }
 
-// ==================== 撒花 ====================
-function confetti() {
-  const emojis = ['🎾','🎉','✨','🌟','🏆','💥','⚡','🔥','🎯','💪','🦁','🐆','⭐','🎊'];
-  for (let i = 0; i < 40; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'confetti-el';
-      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-      el.style.cssText = `
-        left:${Math.random()*100}%;
-        top:${-(20+Math.random()*80)}px;
-        animation-delay:${Math.random()*0.5}s;
-        animation-duration:${2+Math.random()*3}s;
-        font-size:${20+Math.random()*20}px;
-      `;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 3000);
-    }, i * 50);
+function next() {
+  if (answers[curQ] === null) return;
+  if (curQ === questions.length - 1) { calcResult(); return; }
+  curQ++; showQ(curQ);
+}
+function prev() { if (curQ > 0) { curQ--; showQ(curQ); } }
+
+function calcResult() {
+  // 计分
+  scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
+  answers.forEach((ans, i) => {
+    if (ans !== null) {
+      const sc = questions[i].opts[ans].score;
+      for (const [k, v] of Object.entries(sc)) scores[k] += v;
+    }
+  });
+
+  const code =
+    (scores.dim1 >= 0 ? 'E' : 'I') +
+    (scores.dim2 >= 0 ? 'B' : 'T') +
+    (scores.dim3 >= 0 ? 'C' : 'F') +
+    (scores.dim4 >= 0 ? 'P' : 'R');
+
+  const type = typeDB[code];
+  if (!type) {
+    alert('类型计算异常 code=' + code + ' scores=' + JSON.stringify(scores));
+    return;
   }
-}
 
-// ==================== 测试流程 ====================
-function startTest() {
-  currentQ = 0;
-  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
-  answers = new Array(QS.length).fill(null);
-  currentResultCode = '';
-  currentResultData = null;
-  showPage('testPage');
-  renderDotNav();
-  renderQuestion();
-}
+  // 各维度百分比
+  const dimResults = dims.map((d, idx) => {
+    const raw = scores[d.id]; // range: -15 to +15 (5 questions × -3 to +3)
+    const pct = Math.round(50 + (raw / 15) * 50); // map to 0-100
+    const clamped = Math.max(5, Math.min(95, pct));
+    const isLeft = raw >= 0;
+    return { ...d, pct: clamped, raw, result: isLeft ? d.leftName : d.rightName, isLeft };
+  });
 
-function renderDotNav() {
-  document.getElementById('navDots').innerHTML = QS.map((_,i) =>
-    `<span class="dot" id="dot${i}"></span>`
-  ).join('');
-}
+  // 渲染
+  const wrap = document.getElementById('resultWrap');
+  wrap.innerHTML = `
+    <div class="result-hero">
+      <span class="r-emoji">${type.emoji}</span>
+      <div class="r-type">${type.code}</div>
+      <div class="r-name">${type.name}</div>
+      <div class="r-tagline">${type.title}</div>
+    </div>
 
-function renderQuestion() {
-  const q = QS[currentQ];
-  const letters = ['A','B','C','D'];
+    <div class="card">
+      <h3 style="margin-bottom:14px;">📊 四个维度画像</h3>
+      <div class="dim-bars">
+        ${dimResults.map(d => `
+          <div class="dim-bar-card" style="border-left:4px solid ${d.color};">
+            <div class="dbc-head">
+              <span class="dbc-label">${d.name}</span>
+              <span class="dbc-result" style="color:${d.color};">${d.result}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7em;color:#aaa;margin-bottom:4px;">
+              <span>${d.leftName}</span><span>${d.rightName}</span>
+            </div>
+            <div class="dbc-bar">
+              <div class="dbc-fill" style="width:${d.pct}%;background:${d.color};"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
 
-  document.getElementById('qCard').innerHTML = `
-    <span class="q-badge">📋 第 ${currentQ+1} / ${QS.length} 题</span>
-    <div class="q-title">${q.text}</div>
-    <div class="opts-list">
-      ${q.opts.map((o,oi) => `
-        <div class="opt ${answers[currentQ]===oi?'selected':''}" id="opt${oi}" onclick="selectOption(${oi})">
-          <span class="opt-emoji">${o.emoji}</span>
-          <span class="opt-text">${o.text}</span>
-          <span class="opt-check">${answers[currentQ]===oi?'✓':letters[oi]}</span>
+    <div class="card desc-card">
+      <h3>🧐 球场人格解读</h3>
+      <p>${type.desc}</p>
+    </div>
+
+    <div class="card">
+      <h3>💡 给你的建议</h3>
+      <p style="line-height:1.8;">${type.advice}</p>
+    </div>
+
+    <div class="card metaphor-card">
+      <h3>🎭 抽象比喻三连击</h3>
+      <div class="m-row">
+        <div class="m-item">
+          <div class="m-icon">${type.weapons.emoji}</div>
+          <div class="m-label"><strong>${type.weapons.label}</strong><br><small>${type.weapons.note}</small></div>
         </div>
-      `).join('')}
+        <div class="m-item">
+          <div class="m-icon">${type.animal.emoji}</div>
+          <div class="m-label"><strong>${type.animal.label}</strong><br><small>${type.animal.note}</small></div>
+        </div>
+        <div class="m-item">
+          <div class="m-icon">${type.weather.emoji}</div>
+          <div class="m-label"><strong>${type.weather.label}</strong><br><small>${type.weather.note}</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;color:#888;">
+      <p>🎾 <strong>网球灵魂参考</strong><br><small>${type.celeb}</small></p>
     </div>
   `;
 
-  // 更新进度
-  document.getElementById('progLabel').textContent = `第 ${currentQ+1}/${QS.length} 题`;
-  document.getElementById('progPct').textContent = Math.round((currentQ+1)/QS.length*100)+'%';
-  document.getElementById('progFill').style.width = ((currentQ+1)/QS.length*100)+'%';
+  // 显示结果
+  document.getElementById('testPage').classList.add('hidden');
+  document.getElementById('resultPage').classList.remove('hidden');
+  wrap.classList.add('show');
 
-  // 更新导航按钮
-  document.getElementById('prevBtn').disabled = currentQ === 0;
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.textContent = currentQ === QS.length-1 ? '🎉 查看结果' : '下一题 →';
-  nextBtn.disabled = answers[currentQ] === null;
+  // 撒花
+  spawnConfetti();
 
-  // 更新圆点
-  document.querySelectorAll('.dot').forEach((d,i) => {
-    d.classList.toggle('done', answers[i] !== null);
-    d.classList.toggle('current', i === currentQ);
-  });
-
-  // 触发动画
-  const card = document.getElementById('qCard');
-  card.style.animation = 'none';
-  card.offsetHeight;
-  card.style.animation = 'slideInRight 0.35s ease';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function selectOption(oi) {
-  answers[currentQ] = oi;
-  document.querySelectorAll('.opt').forEach((el, i) => {
-    el.classList.toggle('selected', i === oi);
-    const check = el.querySelector('.opt-check');
-    if (check) check.textContent = i === oi ? '✓' : ['A','B','C','D'][i];
-  });
-  document.getElementById('nextBtn').disabled = false;
-  document.querySelectorAll('.dot')[currentQ]?.classList.add('done');
-
-  // 轻触反馈
-  if (navigator.vibrate) navigator.vibrate(10);
-  if (currentQ < QS.length - 1) { currentQ++; renderQuestion(); document.getElementById("qCard").style.animation = "slideInRight 0.35s ease"; document.getElementById("testPage").scrollTop = 0; }
-}
-
-function nextQ() {
-  if (answers[currentQ] === null) { showToast('👆 先选一个嘛'); return; }
-  if (currentQ === QS.length - 1) { calcResult(); return; }
-  currentQ++;
-  renderQuestion();
-  document.getElementById('qCard').style.animation = 'slideInRight 0.35s ease';
-  document.getElementById('testPage').scrollTop = 0;
-}
-
-function prevQ() {
-  if (currentQ > 0) {
-    currentQ--;
-    renderQuestion();
-    document.getElementById('qCard').style.animation = 'slideInLeft 0.35s ease';
+function spawnConfetti() {
+  const emojis = ['🎾','🎉','✨','🌟','🏆','💥','⚡','🔥','🎯','💪','🦁','🐆'];
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * 100 + '%';
+      el.style.top = -(Math.random() * 100) + 'px';
+      el.style.animationDuration = (2 + Math.random() * 3) + 's';
+      el.style.animationDelay = '0s';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }, i * 60);
   }
 }
 
-// ==================== 触摸滑动 ====================
-document.addEventListener('touchstart', e => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}, {passive:true});
-
-document.addEventListener('touchend', e => {
-  if (document.getElementById('testPage').classList.contains('active')) {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
-      if (dx < 0 && answers[currentQ] !== null) nextQ();
-      else if (dx > 0) prevQ();
-    }
-  }
-}, {passive:true});
-
-// ==================== 匹配度计算 ====================
-function calcMatch(selfCode, otherCode) {
-  let score = 0;
-  const sp = [selfCode[0],selfCode[1],selfCode[2],selfCode[3]];
-  const op = [otherCode[0],otherCode[1],otherCode[2],otherCode[3]];
-  for(let i=0;i<4;i++){
-    // 同一侧=基础分
-    const sides = [['E','I'],['B','T'],['C','F'],['P','R']];
-    if(sp[i]===op[i]) score += 25;
-    // 社交互补(0):+10, 风格互补(1):+15
-    if(i===0 && sp[i]!==op[i]) score += 10;
-    if(i===1 && sp[i]!==op[i]) score += 15;
-  }
-  return Math.min(100, score);
+function restart() {
+  document.getElementById('resultPage').classList.add('hidden');
+  document.getElementById('introPage').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==================== 计算结果 ====================
-function calcResult() {
-  try {
-  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
-  answers.forEach(function(ans, i) {
-    if (ans !== null) {
-      var sc = QS[i].opts[ans].s;
-      for (var k in sc) scores[k] += sc[k];
-    }
-  });
-
-  var dim1=(scores.dim1>=0?'E':'I'),dim2=(scores.dim2>=0?'B':'T'),dim3=(scores.dim3>=0?'C':'F'),dim4=(scores.dim4>=0?'P':'R'); var code=dim1+dim2+dim3+dim4;
-  // 适配 TYPES 数据库的字母编码（dim2: T→F, dim3: F→T）
-  var tKey=dim1+(dim2==='B'?'B':'F')+(dim3==='C'?'C':'T')+dim4;
-  var type = TYPES[code] || TYPES[tKey];
-  if (!type) { showToast('类型未找到: '+code); return; }
-
-  currentResultCode = code;
-  currentResultData = type;
-
-  var dimResults = DIMS.map(function(d) {
-    var raw = scores[d.id];
-    var pct = Math.max(5, Math.min(95, Math.round(50+(raw/15)*50)));
-    return { label:d.name, icon:d.icon||'', color:d.color, left:d.l, right:d.r, pct:pct, result:raw>=0?d.l:d.r };
-  });
-
-  // Build match HTML
-  var matchesHTML = '';
-  if (type.matches) {
-    matchesHTML = type.matches.map(function(m,i) {
-      var mt = TYPES[m.code];
-      if (!mt) return '';
-      var badges = ['🥇','🥈','🥉'];
-      return '<div class="match-row"><span class="match-badge">'+badges[i]+'</span><div class="match-info"><span class="match-role">'+mt.role+'</span><span class="match-code">'+mt.code+' '+mt.name+'</span><span class="match-reason">'+m.reason+'</span></div><span class="match-score">'+calcMatch(code,m.code)+'%</span></div>';
-    }).join('');
-  }
-
-  var h = '';
-  h += '<div class="result-hero"><span class="r-emoji">'+type.emoji+'</span><span class="r-code">'+code+'</span><span class="r-name">'+type.name+'</span><span class="r-role">💼 球场职业：'+type.role+'</span><span class="r-tagline">'+type.tagline+'</span></div>';
-
-  h += '<div class="dim-bars">';
-  dimResults.forEach(function(d) {
-    h += '<div class="dim-bar-item" style="border-left-color:'+d.color+'"><div class="dim-bar-head"><span class="dim-bar-label" style="color:'+d.color+'">'+d.icon+' '+d.label+'</span><span class="dim-bar-result">'+d.result+'</span></div><div class="dim-bar-range"><span>'+d.left+'</span><span>'+d.right+'</span></div><div class="dim-bar-track"><div class="dim-bar-fill" style="width:'+d.pct+'%;background:'+d.color+'"></div></div></div>';
-  });
-  h += '</div>';
-
-  h += '<div class="desc-box"><h4>🧐 球场人物解读</h4><p style="white-space:pre-line">'+type.desc+'</p></div>';
-  h += '<div class="desc-box star-box"><h4>🎾 你的网球灵魂对标</h4><div class="star-card"><span class="star-flag">'+type.star.emoji+'</span><div class="star-info"><span class="star-name">'+type.star.name+'</span><span class="star-reason">'+type.star.reason+'</span></div></div><div class="star-others">同类球星：'+(type.stars||[]).join(' · ')+'</div></div>';
-  h += '<div class="desc-box match-box"><h4>🤝 最佳球友匹配 TOP 3</h4>'+matchesHTML+'</div>';
-  h += '<div class="desc-box" style="background:rgba(46,204,113,0.06);border-color:rgba(46,204,113,0.2);"><h4 style="color:#2ecc71;">💡 网球人生建议</h4><p>'+type.advice+'</p></div>';
-  h += '<div class="desc-box" style="background:rgba(155,89,182,0.06);border-color:rgba(155,89,182,0.2);"><h4 style="color:#9b59b6;">🎭 抽象比喻三连击</h4><div class="metaphor-row"><div class="metaphor-item"><span class="m-emoji">'+type.wEmoji+'</span><span class="m-label">'+type.weapon+'</span><span class="m-note">'+type.wNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.aEmoji+'</span><span class="m-label">'+type.animal+'</span><span class="m-note">'+type.aNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.weEmoji+'</span><span class="m-label">'+type.weather+'</span><span class="m-note">'+type.weNote+'</span></div></div></div>';
-
-  document.getElementById('resultContent').innerHTML = h;
-  showPage('resultPage');
-  confetti();
-  setTimeout(drawPoster, 500);
-  } catch(e) { showToast('出错: '+e.message); console.error(e); }
-}
-
-// ==================== 海报绘制 ====================
-function drawPoster() {
-  const canvas = document.getElementById('posterCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const type = currentResultData;
-  const code = currentResultCode;
-  if (!type) return;
-
-  const W = 600, H = 860;
-
-  // 背景
-  ctx.fillStyle = '#1a1a2e';
-  ctx.fillRect(0,0,W,H);
-
-  // 装饰
-  ctx.fillStyle = 'rgba(46,204,113,0.12)';
-  ctx.beginPath(); ctx.arc(W-80,120,140,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = 'rgba(231,76,60,0.1)';
-  ctx.beginPath(); ctx.arc(100,H-150,120,0,Math.PI*2); ctx.fill();
-
-  // 顶部条
-  const grad1 = ctx.createLinearGradient(0,0,W,0);
-  grad1.addColorStop(0,'#e74c3c'); grad1.addColorStop(0.5,'#f1c40f'); grad1.addColorStop(1,'#2ecc71');
-  ctx.fillStyle = grad1;
-  ctx.fillRect(0,0,W,5);
-
-  // 标题
-  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 22px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('🎾 网球人格鉴定局 🎾', W/2, 48);
-
-  // 大emoji
-  ctx.font = '90px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(type.emoji, W/2, 138);
-
-  // 类型代码
-  ctx.fillStyle = '#ffffff'; ctx.font = '900 60px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(code, W/2, 206);
-
-  // 类型名称
-  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 36px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(type.name, W/2, 250);
-
-  // 职业角色
-  ctx.fillStyle = '#f39c12'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText('💼 '+type.role, W/2, 276);
-
-  // 副标题
-  ctx.fillStyle = '#aaaaaa'; ctx.font = '14px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(type.tagline, W/2, 298);
-
-  // 分割线
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(50,316); ctx.lineTo(W-50,316); ctx.stroke();
-
-  // 解读
-  ctx.fillStyle = '#cccccc'; ctx.font = '15px "PingFang SC","Microsoft YaHei",sans-serif';
-  const desc = type.desc.slice(0,85);
-  let lines = [], cur = '';
-  for (let c of desc) {
-    if (ctx.measureText(cur+c).width > W-80) { lines.push(cur); cur = c; }
-    else cur += c;
-  }
-  if (cur) lines.push(cur);
-  let y = 348;
-  lines.forEach(l => { ctx.fillText(l, W/2, y); y += 24; });
-
-  // 球星对标
-  y += 10;
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
-  y += 18;
-  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText('🎾 你的网球灵魂对标', W/2, y);
-  y += 20;
-  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(type.star.name, W/2, y);
-  y += 18;
-  ctx.fillStyle = '#999999'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText(type.star.reason, W/2, y);
-
-  // 比喻区
-  y += 30;
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
-  y += 18;
-  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText('⚔️ 武器 · 🦁 动物 · 🌤️ 天气', W/2, y);
-
-  y += 32;
-  const metas = [
-    { emoji: type.wEmoji, label: type.weapon, note: type.wNote },
-    { emoji: type.aEmoji, label: type.animal, note: type.aNote },
-    { emoji: type.weEmojiIcon, label: type.weather, note: type.weNote }
-  ];
-  const colW = W/3;
-  metas.forEach((m,i) => {
-    const cx = colW*i + colW/2;
-    ctx.font = '40px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText(m.emoji, cx, y);
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText(m.label, cx, y+34);
-    ctx.fillStyle = '#999999'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText(m.note, cx, y+50);
-  });
-
-  // 底部匹配提示
-  y += 80;
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-50,y); ctx.stroke();
-  if(type.matches&&type.matches[0]){
-    const m1=TYPES[type.matches[0].code];
-    ctx.fillStyle = '#777777'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillText('🥇 最佳球友：'+m1.code+' '+m1.role, W/2, y+20);
-  }
-
-  // 水印
-  ctx.fillStyle = '#555555'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.fillText('扫码测测你的网球人格 →', W/2, H-18);
-}
-
-// ==================== 海报弹窗 ====================
-function showPoster() {
-  document.getElementById('posterOverlay').classList.remove('hidden');
-  setTimeout(drawPoster, 200);
-}
-function hidePoster(e) {
-  if (e && e.target !== document.getElementById('posterOverlay')) return;
-  document.getElementById('posterOverlay').classList.add('hidden');
-}
-function savePoster() {
-  const canvas = document.getElementById('posterCanvas');
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = '网球人格_'+currentResultCode+'.png';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('✅ 已保存到相册');
-  }, 'image/png');
-}
-
-// ==================== 分享面板 ====================
-function showSharePanel(resultMode) {
-  var panel = document.getElementById('sharePanel');
-  var overlay = document.getElementById('shareOverlay');
-  if (!panel) {
-    panel = document.createElement('div'); panel.id = 'sharePanel'; panel.className = 'share-panel';
-    overlay = document.createElement('div'); overlay.id = 'shareOverlay'; overlay.className = 'share-overlay';
-    overlay.onclick = hideSharePanel;
-    document.getElementById('app').appendChild(overlay);
-    document.getElementById('app').appendChild(panel);
-  }
-  var html = '<div class="share-panel-title">'+(resultMode?'分享我的网球人格':'邀请球友来测')+'</div>';
-  html += '<div class="share-options">';
-  html += '<div class="share-opt" onclick="copyShareLink('+resultMode+')"><span class="share-opt-icon">📋</span><span class="share-opt-label">复制链接</span><span class="share-opt-sub">发到微信群</span></div>';
-  html += '<div class="share-opt" onclick="copyShareText('+resultMode+')"><span class="share-opt-icon">💬</span><span class="share-opt-label">复制文案</span><span class="share-opt-sub">发朋友圈</span></div>';
-  if (resultMode) html += '<div class="share-opt" onclick="hideSharePanel();showPoster();"><span class="share-opt-icon">📸</span><span class="share-opt-label">生成海报</span><span class="share-opt-sub">保存图片</span></div>';
-  html += '</div>';
-  html += '<div class="share-link-row"><input class="share-link-input" value="'+window.location.href+'" readonly onclick="this.select()"/><button class="share-copy-btn" onclick="copyShareLink('+resultMode+')">复制</button></div>';
-  panel.innerHTML = html;
-  panel.classList.remove('hidden');
-  overlay.classList.remove('hidden');
-}
-function hideSharePanel() {
-  var p=document.getElementById('sharePanel'),o=document.getElementById('shareOverlay');
-  if(p)p.classList.add('hidden'); if(o)o.classList.add('hidden');
-}
-function copyShareLink(resultMode) {
-  var text = resultMode ? '🎾 我的网球人格是【'+currentResultCode+' '+currentResultData.name+'】！来测测你是什么球场奇葩？\n'+window.location.href : '🎾 网球人格鉴定局——20道题测出你的球场奇葩人格！\n'+window.location.href;
-  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去微信群里粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按上方链接手动复制');});
-}
-function copyShareText(resultMode) {
-  var text = resultMode ? '🎾 刚刚测了网球MBTI人格测试\n\n我的球场人格是：'+currentResultCode+' '+currentResultData.name+'\n'+currentResultData.role+'\n对标球星：'+currentResultData.star.name+'\n\n👉 '+window.location.href+'\n来测测你是什么球场奇葩！' : '🎾 网球人格鉴定局\n\n20道灵魂拷问，16种球场奇葩人格\n武器·动物·天气三连比喻\n职业身份命名+球星对标\n\n好玩到停不下来！\n👉 '+window.location.href;
-  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去朋友圈粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按链接手动复制');});
-}
-function shareResult() { showSharePanel(true); }
-function shareIntro() { showSharePanel(false); }
+// 键盘导航
+document.addEventListener('keydown', e => {
+  if (document.getElementById('testPage').classList.contains('hidden')) return;
+  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') prev();
+  if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { if (answers[curQ] !== null) next(); }
+  if (e.key === '1') pick(curQ, 0);
+  if (e.key === '2') pick(curQ, 1);
+  if (e.key === '3') pick(curQ, 2);
+  if (e.key === '4') pick(curQ, 3);
+});
 </script>
 </body>
 </html>
