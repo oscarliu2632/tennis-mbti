@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎾 网球人格鉴定局 — 你到底是什么球场奇葩？</title>
 <style>
@@ -661,7 +664,7 @@ function pick(qi, oi) {
   questions[qi].opts.forEach((_, oi2) => {
     document.getElementById(`opt${qi}_${oi2}`)?.classList.toggle('selected', oi2 === oi);
   });
-  document.getElementById('nextBtn').disabled = false;
+  // auto-advance enabled, nextBtn kept for desktop fallback
   document.getElementById(`dot${qi}`)?.classList.add('done');
   // 选中选项后自动进入下一题
   var isLast = qi === questions.length - 1;
@@ -696,7 +699,24 @@ function calcResult() {
 
   const type = typeDB[code];
   if (!type) {
-    alert('类型计算异常 code=' + code + ' scores=' + JSON.stringify(scores));
+    var msg = '类型计算异常
+
+';
+    msg += '计算结果: ' + code + '
+';
+    msg += '分数详情:
+';
+    msg += '  社交 dim1=' + scores.dim1 + ' -> ' + (scores.dim1>=0?'E':'I') + '
+';
+    msg += '  战斗 dim2=' + scores.dim2 + ' -> ' + (scores.dim2>=0?'B':'T') + '
+';
+    msg += '  胜负 dim3=' + scores.dim3 + ' -> ' + (scores.dim3>=0?'C':'F') + '
+';
+    msg += '  训练 dim4=' + scores.dim4 + ' -> ' + (scores.dim4>=0?'P':'R') + '
+';
+    msg += '
+已回答: ' + answers.filter(function(a){return a!==null;}).length + '/20 题';
+    alert(msg);
     return;
   }
 
