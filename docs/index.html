@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🎾 网球人格鉴定局</title>
+<style>
+  :root {
+    --safe-top: env(safe-area-inset-top, 20px);
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+    --green: #2ecc71; --orange: #e67e22; --blue: #3498db; --red: #e74c3c;
+    --purple: #9b59b6; --yellow: #f1c40f; --teal: #1abc9c;
+    --bg: #0f0f1a; --card: #1a1a2e; --card2: #16213e;
+    --text: #e8e8e8; --muted: #888;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 16px; height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+  }
+
+  /* ===== 全局动画 ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    30% { transform: translateY(-12px); }
+    60% { transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes gradientBG {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-8px) rotate(3deg); }
+    75% { transform: translateY(6px) rotate(-2deg); }
+  }
+  @keyframes confettiDrop {
+    0% { opacity: 1; transform: translateY(-60px) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.2); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ===== 主容器 ===== */
+  #app {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 顶部导航条 ===== */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--safe-top) + 8px) 20px 12px;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .top-bar-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--green), var(--teal), var(--yellow));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientBG 3s ease infinite;
+  }
+
+  /* ===== 页面容器 ===== */
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 20px 40px;
+    display: none;
+  }
+  .page.active { display: block; animation: fadeInUp 0.4s ease; }
+
+  /* 隐藏滚动条但可滚动 */
+  .page::-webkit-scrollbar { display: none; }
+
+  /* ===== 首页 ===== */
+  .intro-hero {
+    text-align: center;
+    padding: 20px 0 30px;
+  }
+  .intro-ball {
+    font-size: 80px;
+    display: block;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 8px 16px rgba(241,196,15,0.4));
+  }
+  .intro-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 12px 0 6px;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #2ecc71, #f1c40f, #e67e22, #e74c3c);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientBG 4s ease infinite;
+  }
+  .intro-sub { font-size: 15px; color: var(--muted); }
+  .intro-joke { font-size: 12px; color: #666; margin-top: 4px; }
+
+  .dim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .dim-item {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .dim-item:active { transform: scale(0.97); border-color: rgba(241,196,15,0.3); }
+  .dim-emoji { font-size: 36px; display: block; }
+  .dim-label { font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--text); }
+  .dim-pair { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .info-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .info-card p { font-size: 14px; color: #bbb; line-height: 2; }
+  .info-card .highlight { color: var(--yellow); font-weight: 700; }
+
+  /* ===== 按钮 ===== */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    height: 54px;
+    border-radius: 27px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: linear-gradient(135deg, #e67e22, #e74c3c);
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(231,76,60,0.35);
+    margin-top: 20px;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2s infinite;
+  }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.12);
+    margin-top: 12px;
+  }
+
+  /* ===== 答题页 ===== */
+  .test-page-inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .progress-wrap {
+    padding: 6px 0 16px;
+    flex-shrink: 0;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--teal));
+    transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .q-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .q-badge {
+    display: inline-block;
+    background: rgba(241,196,15,0.15);
+    color: var(--yellow);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    align-self: flex-start;
+  }
+  .q-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    color: #fff;
+  }
+
+  .opts-list { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .opt:active { background: rgba(46,204,113,0.08); border-color: rgba(46,204,113,0.3); }
+  .opt.selected {
+    background: rgba(46,204,113,0.12) !important;
+    border-color: var(--green) !important;
+    box-shadow: 0 0 20px rgba(46,204,113,0.15);
+  }
+  .opt-emoji {
+    font-size: 28px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .opt-text {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .opt-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .opt.selected .opt-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  /* 底部导航 */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:active { background: rgba(255,255,255,0.1); }
+  .nav-btn:disabled { opacity: 0.3; }
+  .nav-btn.next-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(46,204,113,0.3);
+  }
+  .nav-btn.next-btn:disabled { opacity: 0.4; }
+
+  .nav-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+  .dot.done { background: var(--green); }
+  .dot.current { background: var(--yellow); transform: scale(1.8); }
+
+  /* ===== 结果页 ===== */
+  .result-hero {
+    text-align: center;
+    padding: 30px 20px;
+    border-radius: 20px;
+    background: linear-gradient(160deg, #1a1a2e, #16213e);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 16px;
+  }
+  .r-emoji { font-size: 80px; display: block; animation: pulse 2s ease-in-out infinite; }
+  .r-code {
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    margin: 6px 0;
+    display: block;
+  }
+  .r-name {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--yellow);
+    display: block;
+  }
+  .r-tagline {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 4px;
+    display: block;
+  }
+
+  .dim-bars { display: flex; flex-direction: column; gap: 10px; }
+  .dim-bar-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--green);
+  }
+  .dim-bar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .dim-bar-label { font-size: 14px; font-weight: 700; }
+  .dim-bar-result { font-size: 13px; font-weight: 600; }
+  .dim-bar-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+  .dim-bar-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .dim-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s cubic-bezier(0.16, 0.68, 0.18, 1.02);
+  }
+
+  .desc-box {
+    background: rgba(241,196,15,0.06);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    border: 1px dashed rgba(241,196,15,0.2);
+  }
+  .desc-box h4 { font-size: 16px; color: var(--yellow); margin-bottom: 8px; }
+  .desc-box p { font-size: 14px; line-height: 1.8; color: #ccc; white-space: pre-line; }
+
+  .metaphor-row {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    padding: 10px 0;
+  }
+  .metaphor-item { flex: 1; }
+  .metaphor-item .m-emoji { font-size: 40px; display: block; }
+  .metaphor-item .m-label { font-size: 15px; font-weight: 700; margin: 4px 0; }
+  .metaphor-item .m-note { font-size: 11px; color: var(--muted); }
+
+
+  .share-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1a1a2e; border-radius: 20px 20px 0 0;
+    padding: 28px 20px 40px; z-index: 200; animation: fadeInUp 0.3s ease;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+  }
+  .share-panel.hidden { display: none; }
+  .share-panel-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 20px; color: #fff; }
+  .share-options { display: flex; justify-content: space-around; gap: 12px; }
+  .share-opt {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 16px 10px; border-radius: 16px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); cursor: pointer; flex: 1;
+  }
+  .share-opt:active { background: rgba(255,255,255,0.12); }
+  .share-opt-icon { font-size: 36px; }
+  .share-opt-label { font-size: 13px; color: #ccc; font-weight: 600; }
+  .share-opt-sub { font-size: 11px; color: #888; }
+  .share-link-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+  .share-link-input {
+    flex: 1; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12); color: #aaa; font-size: 13px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .share-copy-btn {
+    padding: 10px 18px; border-radius: 10px; background: var(--green);
+    color: #fff; font-weight: 700; font-size: 13px; border: none; cursor: pointer;
+  }
+  .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+  .share-overlay.hidden { display: none; }
+
+  .celeb-box {
+    text-align: center;
+    padding: 14px;
+    background: var(--card);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 10px 0;
+  }
+  .r-role {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f39c12;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  .star-box { }
+  .star-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    margin: 10px 0;
+  }
+  .star-flag { font-size: 40px; flex-shrink: 0; }
+  .star-info { display: flex; flex-direction: column; gap: 4px; }
+  .star-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .star-reason { font-size: 13px; color: #aaa; line-height: 1.5; }
+  .star-others { font-size: 12px; color: #666; margin-top: 6px; text-align: center; }
+  .match-box { }
+  .match-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .match-row:last-child { border-bottom: none; }
+  .match-badge { font-size: 24px; flex-shrink: 0; width: 32px; text-align: center; }
+  .match-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .match-role { font-size: 11px; color: var(--yellow); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .match-code { font-size: 14px; font-weight: 700; color: #fff; }
+  .match-reason { font-size: 12px; color: #888; line-height: 1.4; }
+  .match-score {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--green);
+    flex-shrink: 0;
+    min-width: 45px;
+    text-align: right;
+  }
+
+  /* 分享区域 */
+  .share-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0 40px;
+  }
+
+  /* ===== 海报弹窗 ===== */
+  .poster-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+  .poster-overlay.hidden { display: none; }
+  .poster-close {
+    position: absolute;
+    top: max(20px, var(--safe-top));
+    right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .poster-card {
+    width: 300px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  .poster-card canvas { display: block; width: 100%; height: auto; }
+  .poster-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .poster-actions .btn { width: 280px; height: 48px; font-size: 16px; }
+  .poster-tip { font-size: 12px; color: #666; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    z-index: 200;
+    animation: fadeIn 0.2s ease;
+    pointer-events: none;
+  }
+  .toast.hidden { display: none; }
+
+  /* ===== 撒花 ===== */
+  .confetti-el {
+    position: fixed;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 150;
+    animation: confettiDrop 2.5s ease-out forwards;
+  }
+
+  /* ===== 背景粒子 ===== */
+  .bg-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(46,204,113,0.06);
+    animation: float 7s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- 顶部条 -->
+  <div class="top-bar" id="topBar">
+    <span class="top-bar-title">🎾 网球人格鉴定局</span>
+  </div>
+
+  <!-- 背景粒子 -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- ===== 首页 ===== -->
+  <div class="page active" id="introPage">
+    <div class="intro-hero">
+      <span class="intro-ball">🎾</span>
+      <h1 class="intro-title">网球人格鉴定局</h1>
+      <p class="intro-sub">🔬 专业鉴定你在球场上的真实面目</p>
+      <p class="intro-joke">不保证科学，但保证好笑</p>
+    </div>
+
+    <div class="dim-grid">
+      <div class="dim-item"><span class="dim-emoji">🎉</span><span class="dim-label">社交模式</span><span class="dim-pair">组局狂魔 vs 独自美丽</span></div>
+      <div class="dim-item"><span class="dim-emoji">⚔️</span><span class="dim-label">战斗风格</span><span class="dim-pair">暴力输出 vs 优雅艺术</span></div>
+      <div class="dim-item"><span class="dim-emoji">🏆</span><span class="dim-label">胜负执念</span><span class="dim-pair">冠军癌晚期 vs 佛系养生</span></div>
+      <div class="dim-item"><span class="dim-emoji">📋</span><span class="dim-label">训练模式</span><span class="dim-pair">计划狂魔 vs 随缘玩家</span></div>
+    </div>
+
+    <div class="info-card">
+      <p>📝 <span class="highlight">20道</span>灵魂拷问 · ⏱ 约<span class="highlight">3分钟</span></p>
+      <p>🎭 <span class="highlight">16种</span>球场奇葩人格</p>
+      <p>⚔️ 武器 · 🦁 动物 · 🌤️ 天气 比喻</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="startTest()">🔪 开始解剖自己</button>
+    <button class="btn btn-secondary" id="shareIntroBtn" onclick="shareIntro()">📤 邀请球友来测</button>
+  </div>
+
+  <!-- ===== 测试页 ===== -->
+  <div class="page" id="testPage">
+    <div class="test-page-inner">
+      <div class="progress-wrap">
+        <div class="progress-info"><span id="progLabel">第 1/20 题</span><span id="progPct">5%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progFill" style="width:5%"></div></div>
+      </div>
+      <div class="q-card" id="qCard"></div>
+      <div class="nav-row">
+        <button class="nav-btn" id="prevBtn" onclick="prevQ()" disabled>← 上一题</button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn next-btn" id="nextBtn" onclick="nextQ()" disabled>下一题 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 结果页 ===== -->
+  <div class="page" id="resultPage">
+    <div id="resultContent"></div>
+    <div class="share-section">
+      <button class="btn btn-primary" onclick="showPoster()">📸 生成分享卡片</button>
+      <button class="btn btn-secondary" id="shareResultBtn" onclick="shareResult()">📤 分享给球友</button>
+      <button class="btn btn-secondary" onclick="restart()">🔄 再测一次</button>
+    </div>
+  </div>
+
+  <!-- ===== 海报弹窗 ===== -->
+  <div class="poster-overlay hidden" id="posterOverlay" onclick="hidePoster(event)">
+    <span class="poster-close" onclick="hidePoster()">✕</span>
+    <div class="poster-card" id="posterCard">
+      <canvas id="posterCanvas" width="600" height="860"></canvas>
+    </div>
+    <div class="poster-actions">
+      <button class="btn btn-primary" onclick="savePoster()">💾 保存图片</button>
+      <span class="poster-tip">长按卡片也可保存 · 发朋友圈必备</span>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ==================== 程序逻辑 ====================
+
+// ==================== 状态 ====================
+let currentQ = 0;
+let scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+let answers = new Array(QS.length).fill(null);
+let touchStartX = 0;
+let touchStartY = 0;
+let currentResultCode = '';
+let currentResultData = null;
+
+// ==================== 页面切换 ====================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); el.scrollTop = 0; }
+}
+
+// ==================== 背景粒子 ====================
+function initParticles() {
+  const container = document.getElementById('bgParticles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size = 20 + Math.random() * 80;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      animation-delay:${Math.random()*7}s;
+      animation-duration:${6+Math.random()*8}s;
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ==================== Toast ====================
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 1800);
+}
+
+// ==================== 撒花 ====================
+function confetti() {
+  const emojis = ['🎾','🎉','✨','🌟','🏆','💥','⚡','🔥','🎯','💪','🦁','🐆','⭐','🎊'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-el';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.cssText = `
+        left:${Math.random()*100}%;
+        top:${-(20+Math.random()*80)}px;
+        animation-delay:${Math.random()*0.5}s;
+        animation-duration:${2+Math.random()*3}s;
+        font-size:${20+Math.random()*20}px;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }, i * 50);
+  }
+}
+
+// ==================== 测试流程 ====================
+function startTest() {
+  currentQ = 0;
+  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+  answers = new Array(QS.length).fill(null);
+  currentResultCode = '';
+  currentResultData = null;
+  showPage('testPage');
+  renderDotNav();
+  renderQuestion();
+}
+
+function renderDotNav() {
+  document.getElementById('navDots').innerHTML = QS.map((_,i) =>
+    `<span class="dot" id="dot${i}"></span>`
+  ).join('');
+}
+
+function renderQuestion() {
+  const q = QS[currentQ];
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('qCard').innerHTML = `
+    <span class="q-badge">📋 第 ${currentQ+1} / ${QS.length} 题</span>
+    <div class="q-title">${q.text}</div>
+    <div class="opts-list">
+      ${q.opts.map((o,oi) => `
+        <div class="opt ${answers[currentQ]===oi?'selected':''}" id="opt${oi}" onclick="selectOption(${oi})">
+          <span class="opt-emoji">${o.emoji}</span>
+          <span class="opt-text">${o.text}</span>
+          <span class="opt-check">${answers[currentQ]===oi?'✓':letters[oi]}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // 更新进度
+  document.getElementById('progLabel').textContent = `第 ${currentQ+1}/${QS.length} 题`;
+  document.getElementById('progPct').textContent = Math.round((currentQ+1)/QS.length*100)+'%';
+  document.getElementById('progFill').style.width = ((currentQ+1)/QS.length*100)+'%';
+
+  // 更新导航按钮
+  document.getElementById('prevBtn').disabled = currentQ === 0;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = currentQ === QS.length-1 ? '🎉 查看结果' : '下一题 →';
+  nextBtn.disabled = answers[currentQ] === null;
+
+  // 更新圆点
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.classList.toggle('done', answers[i] !== null);
+    d.classList.toggle('current', i === currentQ);
+  });
+
+  // 触发动画
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'slideInRight 0.35s ease';
+}
+
+function selectOption(oi) {
+  answers[currentQ] = oi;
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === oi);
+    const check = el.querySelector('.opt-check');
+    if (check) check.textContent = i === oi ? '✓' : ['A','B','C','D'][i];
+  });
+  document.getElementById('nextBtn').disabled = false;
+  document.querySelectorAll('.dot')[currentQ]?.classList.add('done');
+
+  // 轻触反馈
+  if (navigator.vibrate) navigator.vibrate(10);
+  if (currentQ < QS.length - 1) { currentQ++; renderQuestion(); document.getElementById("qCard").style.animation = "slideInRight 0.35s ease"; document.getElementById("testPage").scrollTop = 0; }
+}
+
+function nextQ() {
+  if (answers[currentQ] === null) { showToast('👆 先选一个嘛'); return; }
+  if (currentQ === QS.length - 1) { calcResult(); return; }
+  currentQ++;
+  renderQuestion();
+  document.getElementById('qCard').style.animation = 'slideInRight 0.35s ease';
+  document.getElementById('testPage').scrollTop = 0;
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    document.getElementById('qCard').style.animation = 'slideInLeft 0.35s ease';
+  }
+}
+
+// ==================== 触摸滑动 ====================
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  if (document.getElementById('testPage').classList.contains('active')) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+      if (dx < 0 && answers[currentQ] !== null) nextQ();
+      else if (dx > 0) prevQ();
+    }
+  }
+}, {passive:true});
+
+// ==================== 匹配度计算 ====================
+function calcMatch(selfCode, otherCode) {
+  let score = 0;
+  const sp = [selfCode[0],selfCode[1],selfCode[2],selfCode[3]];
+  const op = [otherCode[0],otherCode[1],otherCode[2],otherCode[3]];
+  for(let i=0;i<4;i++){
+    // 同一侧=基础分
+    const sides = [['E','I'],['B','T'],['C','F'],['P','R']];
+    if(sp[i]===op[i]) score += 25;
+    // 社交互补(0):+10, 风格互补(1):+15
+    if(i===0 && sp[i]!==op[i]) score += 10;
+    if(i===1 && sp[i]!==op[i]) score += 15;
+  }
+  return Math.min(100, score);
+}
+
+// ==================== 计算结果 ====================
+function calcResult() {
+  try {
+  scores = { dim1:0, dim2:0, dim3:0, dim4:0 };
+  answers.forEach(function(ans, i) {
+    if (ans !== null) {
+      var sc = QS[i].opts[ans].s;
+      for (var k in sc) scores[k] += sc[k];
+    }
+  });
+
+  var dim1=(scores.dim1>=0?'E':'I'),dim2=(scores.dim2>=0?'B':'T'),dim3=(scores.dim3>=0?'C':'F'),dim4=(scores.dim4>=0?'P':'R'); var code=dim1+dim2+dim3+dim4;
+  // 适配 TYPES 数据库的字母编码（dim2: T→F, dim3: F→T）
+  var tKey=dim1+(dim2==='B'?'B':'F')+(dim3==='C'?'C':'T')+dim4;
+  var type = TYPES[code] || TYPES[tKey];
+  if (!type) { showToast('类型未找到: '+code); return; }
+
+  currentResultCode = code;
+  currentResultData = type;
+
+  var dimResults = DIMS.map(function(d) {
+    var raw = scores[d.id];
+    var pct = Math.max(5, Math.min(95, Math.round(50+(raw/15)*50)));
+    return { label:d.name, icon:d.icon||'', color:d.color, left:d.l, right:d.r, pct:pct, result:raw>=0?d.l:d.r };
+  });
+
+  // Build match HTML
+  var matchesHTML = '';
+  if (type.matches) {
+    matchesHTML = type.matches.map(function(m,i) {
+      var mt = TYPES[m.code];
+      if (!mt) return '';
+      var badges = ['🥇','🥈','🥉'];
+      return '<div class="match-row"><span class="match-badge">'+badges[i]+'</span><div class="match-info"><span class="match-role">'+mt.role+'</span><span class="match-code">'+mt.code+' '+mt.name+'</span><span class="match-reason">'+m.reason+'</span></div><span class="match-score">'+calcMatch(code,m.code)+'%</span></div>';
+    }).join('');
+  }
+
+  var h = '';
+  h += '<div class="result-hero"><span class="r-emoji">'+type.emoji+'</span><span class="r-code">'+code+'</span><span class="r-name">'+type.name+'</span><span class="r-role">💼 球场职业：'+type.role+'</span><span class="r-tagline">'+type.tagline+'</span></div>';
+
+  h += '<div class="dim-bars">';
+  dimResults.forEach(function(d) {
+    h += '<div class="dim-bar-item" style="border-left-color:'+d.color+'"><div class="dim-bar-head"><span class="dim-bar-label" style="color:'+d.color+'">'+d.icon+' '+d.label+'</span><span class="dim-bar-result">'+d.result+'</span></div><div class="dim-bar-range"><span>'+d.left+'</span><span>'+d.right+'</span></div><div class="dim-bar-track"><div class="dim-bar-fill" style="width:'+d.pct+'%;background:'+d.color+'"></div></div></div>';
+  });
+  h += '</div>';
+
+  h += '<div class="desc-box"><h4>🧐 球场人物解读</h4><p style="white-space:pre-line">'+type.desc+'</p></div>';
+  h += '<div class="desc-box star-box"><h4>🎾 你的网球灵魂对标</h4><div class="star-card"><span class="star-flag">'+type.star.emoji+'</span><div class="star-info"><span class="star-name">'+type.star.name+'</span><span class="star-reason">'+type.star.reason+'</span></div></div><div class="star-others">同类球星：'+(type.stars||[]).join(' · ')+'</div></div>';
+  h += '<div class="desc-box match-box"><h4>🤝 最佳球友匹配 TOP 3</h4>'+matchesHTML+'</div>';
+  h += '<div class="desc-box" style="background:rgba(46,204,113,0.06);border-color:rgba(46,204,113,0.2);"><h4 style="color:#2ecc71;">💡 网球人生建议</h4><p>'+type.advice+'</p></div>';
+  h += '<div class="desc-box" style="background:rgba(155,89,182,0.06);border-color:rgba(155,89,182,0.2);"><h4 style="color:#9b59b6;">🎭 抽象比喻三连击</h4><div class="metaphor-row"><div class="metaphor-item"><span class="m-emoji">'+type.wEmoji+'</span><span class="m-label">'+type.weapon+'</span><span class="m-note">'+type.wNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.aEmoji+'</span><span class="m-label">'+type.animal+'</span><span class="m-note">'+type.aNote+'</span></div><div class="metaphor-item"><span class="m-emoji">'+type.weEmoji+'</span><span class="m-label">'+type.weather+'</span><span class="m-note">'+type.weNote+'</span></div></div></div>';
+
+  document.getElementById('resultContent').innerHTML = h;
+  showPage('resultPage');
+  confetti();
+  setTimeout(drawPoster, 500);
+  } catch(e) { showToast('出错: '+e.message); console.error(e); }
+}
+
+// ==================== 海报绘制 ====================
+function drawPoster() {
+  const canvas = document.getElementById('posterCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const type = currentResultData;
+  const code = currentResultCode;
+  if (!type) return;
+
+  const W = 600, H = 860;
+
+  // 背景
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0,0,W,H);
+
+  // 装饰
+  ctx.fillStyle = 'rgba(46,204,113,0.12)';
+  ctx.beginPath(); ctx.arc(W-80,120,140,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(231,76,60,0.1)';
+  ctx.beginPath(); ctx.arc(100,H-150,120,0,Math.PI*2); ctx.fill();
+
+  // 顶部条
+  const grad1 = ctx.createLinearGradient(0,0,W,0);
+  grad1.addColorStop(0,'#e74c3c'); grad1.addColorStop(0.5,'#f1c40f'); grad1.addColorStop(1,'#2ecc71');
+  ctx.fillStyle = grad1;
+  ctx.fillRect(0,0,W,5);
+
+  // 标题
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 22px "PingFang SC","Microsoft YaHei",sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('🎾 网球人格鉴定局 🎾', W/2, 48);
+
+  // 大emoji
+  ctx.font = '90px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.emoji, W/2, 138);
+
+  // 类型代码
+  ctx.fillStyle = '#ffffff'; ctx.font = '900 60px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(code, W/2, 206);
+
+  // 类型名称
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 36px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.name, W/2, 250);
+
+  // 职业角色
+  ctx.fillStyle = '#f39c12'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('💼 '+type.role, W/2, 276);
+
+  // 副标题
+  ctx.fillStyle = '#aaaaaa'; ctx.font = '14px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.tagline, W/2, 298);
+
+  // 分割线
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(50,316); ctx.lineTo(W-50,316); ctx.stroke();
+
+  // 解读
+  ctx.fillStyle = '#cccccc'; ctx.font = '15px "PingFang SC","Microsoft YaHei",sans-serif';
+  const desc = type.desc.slice(0,85);
+  let lines = [], cur = '';
+  for (let c of desc) {
+    if (ctx.measureText(cur+c).width > W-80) { lines.push(cur); cur = c; }
+    else cur += c;
+  }
+  if (cur) lines.push(cur);
+  let y = 348;
+  lines.forEach(l => { ctx.fillText(l, W/2, y); y += 24; });
+
+  // 球星对标
+  y += 10;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
+  y += 18;
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('🎾 你的网球灵魂对标', W/2, y);
+  y += 20;
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.star.name, W/2, y);
+  y += 18;
+  ctx.fillStyle = '#999999'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(type.star.reason, W/2, y);
+
+  // 比喻区
+  y += 30;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
+  y += 18;
+  ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('⚔️ 武器 · 🦁 动物 · 🌤️ 天气', W/2, y);
+
+  y += 32;
+  const metas = [
+    { emoji: type.wEmoji, label: type.weapon, note: type.wNote },
+    { emoji: type.aEmoji, label: type.animal, note: type.aNote },
+    { emoji: type.weEmojiIcon, label: type.weather, note: type.weNote }
+  ];
+  const colW = W/3;
+  metas.forEach((m,i) => {
+    const cx = colW*i + colW/2;
+    ctx.font = '40px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.emoji, cx, y);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.label, cx, y+34);
+    ctx.fillStyle = '#999999'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText(m.note, cx, y+50);
+  });
+
+  // 底部匹配提示
+  y += 80;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-50,y); ctx.stroke();
+  if(type.matches&&type.matches[0]){
+    const m1=TYPES[type.matches[0].code];
+    ctx.fillStyle = '#777777'; ctx.font = '13px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText('🥇 最佳球友：'+m1.code+' '+m1.role, W/2, y+20);
+  }
+
+  // 水印
+  ctx.fillStyle = '#555555'; ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('扫码测测你的网球人格 →', W/2, H-18);
+}
+
+// ==================== 海报弹窗 ====================
+function showPoster() {
+  document.getElementById('posterOverlay').classList.remove('hidden');
+  setTimeout(drawPoster, 200);
+}
+function hidePoster(e) {
+  if (e && e.target !== document.getElementById('posterOverlay')) return;
+  document.getElementById('posterOverlay').classList.add('hidden');
+}
+function savePoster() {
+  const canvas = document.getElementById('posterCanvas');
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = '网球人格_'+currentResultCode+'.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ 已保存到相册');
+  }, 'image/png');
+}
+
+// ==================== 分享面板 ====================
+function showSharePanel(resultMode) {
+  var panel = document.getElementById('sharePanel');
+  var overlay = document.getElementById('shareOverlay');
+  if (!panel) {
+    panel = document.createElement('div'); panel.id = 'sharePanel'; panel.className = 'share-panel';
+    overlay = document.createElement('div'); overlay.id = 'shareOverlay'; overlay.className = 'share-overlay';
+    overlay.onclick = hideSharePanel;
+    document.getElementById('app').appendChild(overlay);
+    document.getElementById('app').appendChild(panel);
+  }
+  var html = '<div class="share-panel-title">'+(resultMode?'分享我的网球人格':'邀请球友来测')+'</div>';
+  html += '<div class="share-options">';
+  html += '<div class="share-opt" onclick="copyShareLink('+resultMode+')"><span class="share-opt-icon">📋</span><span class="share-opt-label">复制链接</span><span class="share-opt-sub">发到微信群</span></div>';
+  html += '<div class="share-opt" onclick="copyShareText('+resultMode+')"><span class="share-opt-icon">💬</span><span class="share-opt-label">复制文案</span><span class="share-opt-sub">发朋友圈</span></div>';
+  if (resultMode) html += '<div class="share-opt" onclick="hideSharePanel();showPoster();"><span class="share-opt-icon">📸</span><span class="share-opt-label">生成海报</span><span class="share-opt-sub">保存图片</span></div>';
+  html += '</div>';
+  html += '<div class="share-link-row"><input class="share-link-input" value="'+window.location.href+'" readonly onclick="this.select()"/><button class="share-copy-btn" onclick="copyShareLink('+resultMode+')">复制</button></div>';
+  panel.innerHTML = html;
+  panel.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+}
+function hideSharePanel() {
+  var p=document.getElementById('sharePanel'),o=document.getElementById('shareOverlay');
+  if(p)p.classList.add('hidden'); if(o)o.classList.add('hidden');
+}
+function copyShareLink(resultMode) {
+  var text = resultMode ? '🎾 我的网球人格是【'+currentResultCode+' '+currentResultData.name+'】！来测测你是什么球场奇葩？\n'+window.location.href : '🎾 网球人格鉴定局——20道题测出你的球场奇葩人格！\n'+window.location.href;
+  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去微信群里粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按上方链接手动复制');});
+}
+function copyShareText(resultMode) {
+  var text = resultMode ? '🎾 刚刚测了网球MBTI人格测试\n\n我的球场人格是：'+currentResultCode+' '+currentResultData.name+'\n'+currentResultData.role+'\n对标球星：'+currentResultData.star.name+'\n\n👉 '+window.location.href+'\n来测测你是什么球场奇葩！' : '🎾 网球人格鉴定局\n\n20道灵魂拷问，16种球场奇葩人格\n武器·动物·天气三连比喻\n职业身份命名+球星对标\n\n好玩到停不下来！\n👉 '+window.location.href;
+  navigator.clipboard.writeText(text).then(function(){showToast('✅ 已复制！去朋友圈粘贴吧');hideSharePanel();}).catch(function(){showToast('复制失败，请长按链接手动复制');});
+}
+function shareResult() { showSharePanel(true); }
+function shareIntro() { showSharePanel(false); }
+</script>
+</body>
+</html>
