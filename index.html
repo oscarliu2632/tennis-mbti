@@ -659,7 +659,6 @@ function showQ(i) {
   }
 }
 
-
 // ======== 事件绑定（兼容微信浏览器）========
 (function bindEvents() {
   var btnStart = document.getElementById('btnStart');
@@ -730,25 +729,20 @@ function calcResult() {
     (scores.dim3 >= 0 ? 'C' : 'F') +
     (scores.dim4 >= 0 ? 'P' : 'R');
 
-  const type = typeDB[code];
+    const type = typeDB[code];
   if (!type) {
-    var msg = '类型计算异常
-
-';
-    msg += '计算结果: ' + code + '
-';
-    msg += '分数详情:
-';
-    msg += '  社交 dim1=' + scores.dim1 + ' -> ' + (scores.dim1>=0?'E':'I') + '
-';
-    msg += '  战斗 dim2=' + scores.dim2 + ' -> ' + (scores.dim2>=0?'B':'T') + '
-';
-    msg += '  胜负 dim3=' + scores.dim3 + ' -> ' + (scores.dim3>=0?'C':'F') + '
-';
-    msg += '  训练 dim4=' + scores.dim4 + ' -> ' + (scores.dim4>=0?'P':'R') + '
-';
-    msg += '
-已回答: ' + answers.filter(function(a){return a!==null;}).length + '/20 题';
+    var msg = [
+      '类型计算异常',
+      '',
+      '计算结果: ' + code,
+      '分数详情:',
+      '  社交 dim1=' + scores.dim1 + ' -> ' + (scores.dim1>=0?'E':'I'),
+      '  战斗 dim2=' + scores.dim2 + ' -> ' + (scores.dim2>=0?'B':'T'),
+      '  胜负 dim3=' + scores.dim3 + ' -> ' + (scores.dim3>=0?'C':'F'),
+      '  训练 dim4=' + scores.dim4 + ' -> ' + (scores.dim4>=0?'P':'R'),
+      '',
+      '已回答: ' + answers.filter(function(a){return a!==null;}).length + '/20 题'
+    ].join('\n');
     alert(msg);
     return;
   }
@@ -859,15 +853,18 @@ function restart() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 键盘导航（已由上方事件绑定处理）
-  if (document.getElementById('testPage').classList.contains('hidden')) return;
-  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') prev();
-  if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { if (answers[curQ] !== null) next(); }
-  if (e.key === '1') pick(curQ, 0);
-  if (e.key === '2') pick(curQ, 1);
-  if (e.key === '3') pick(curQ, 2);
-  if (e.key === '4') pick(curQ, 3);
-});
+
+  // 键盘导航
+  document.addEventListener('keydown', function(e) {
+    if (document.getElementById('testPage').classList.contains('hidden')) return;
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') prev();
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { if (answers[curQ] !== null) next(); }
+    if (e.key === '1') pick(curQ, 0);
+    if (e.key === '2') pick(curQ, 1);
+    if (e.key === '3') pick(curQ, 2);
+    if (e.key === '4') pick(curQ, 3);
+  });
+
 </script>
 </body>
 </html>
