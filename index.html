@@ -601,6 +601,8 @@ let scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
 let answers = new Array(questions.length).fill(null);
 
 function start() {
+  window._computing = false;
+  if (window._autoTimer) { clearTimeout(window._autoTimer); window._autoTimer = null; }
   document.getElementById('introPage').classList.add('hidden');
   document.getElementById('testPage').classList.remove('hidden');
   document.getElementById('resultPage').classList.add('hidden');
@@ -693,16 +695,17 @@ function showQ(i) {
 // ======== 键盘导航 ========
 function pick(qi, oi) {
   answers[qi] = oi;
-  questions[qi].opts.forEach((_, oi2) => {
-    document.getElementById(`opt${qi}_${oi2}`)?.classList.toggle('selected', oi2 === oi);
-  });
-  // auto-advance enabled, nextBtn kept for desktop fallback
-  document.getElementById(`dot${qi}`)?.classList.add('done');
-  // 选中选项后自动进入下一题
+  var btns = document.querySelectorAll('.opt-btn[data-qi="' + qi + '"]');
+  btns.forEach(function(b, idx) { b.classList.toggle('selected', idx === oi); });
+  var dot = document.getElementById('dot' + qi);
+  if (dot) dot.classList.add('done');
+  // 防止连点跳过
+  if (window._autoTimer) { clearTimeout(window._autoTimer); window._autoTimer = null; }
   var isLast = qi === questions.length - 1;
-  setTimeout(function() {
+  window._autoTimer = setTimeout(function() {
+    window._autoTimer = null;
     if (isLast) { calcResult(); return; }
-    curQ++; showQ(curQ);
+    if (curQ < questions.length - 1) { curQ++; showQ(curQ); }
   }, 350);
 }
 
@@ -714,6 +717,8 @@ function next() {
 function prev() { if (curQ > 0) { curQ--; showQ(curQ); } }
 
 function calcResult() {
+  if (window._computing) return;
+  window._computing = true;
   // 计分
   scores = { dim1: 0, dim2: 0, dim3: 0, dim4: 0 };
   answers.forEach((ans, i) => {
@@ -723,10 +728,11 @@ function calcResult() {
     }
   });
 
+  // typeDB 用 B/F (dim2) 和 C/T (dim3) 命名，需与数据库一致
   const code =
     (scores.dim1 >= 0 ? 'E' : 'I') +
-    (scores.dim2 >= 0 ? 'B' : 'T') +
-    (scores.dim3 >= 0 ? 'C' : 'F') +
+    (scores.dim2 >= 0 ? 'B' : 'F') +
+    (scores.dim3 >= 0 ? 'C' : 'T') +
     (scores.dim4 >= 0 ? 'P' : 'R');
 
     const type = typeDB[code];
