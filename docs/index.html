@@ -663,6 +663,12 @@ function pick(qi, oi) {
   });
   document.getElementById('nextBtn').disabled = false;
   document.getElementById(`dot${qi}`)?.classList.add('done');
+  // 选中选项后自动进入下一题
+  var isLast = qi === questions.length - 1;
+  setTimeout(function() {
+    if (isLast) { calcResult(); return; }
+    curQ++; showQ(curQ);
+  }, 350);
 }
 
 function next() {
@@ -689,7 +695,10 @@ function calcResult() {
     (scores.dim4 >= 0 ? 'P' : 'R');
 
   const type = typeDB[code];
-  if (!type) { alert('类型计算异常，请重新测试！'); return; }
+  if (!type) {
+    alert('类型计算异常 code=' + code + ' scores=' + JSON.stringify(scores));
+    return;
+  }
 
   // 各维度百分比
   const dimResults = dims.map((d, idx) => {
