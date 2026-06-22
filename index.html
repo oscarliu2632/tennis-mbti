@@ -251,7 +251,7 @@
         📝 20道灵魂拷问 · ⏱ 约3分钟 · 🎭 16种球场奇葩人格<br>
         <small>每道题四个选项，请凭第一直觉作答，思前想后就不准了！</small>
       </p>
-      <button class="btn btn-go" onclick="start()">🔪 开始解剖自己</button>
+      <button class="btn btn-go" id="btnStart">🔪 开始解剖自己</button>
     </div>
   </div>
 
@@ -264,9 +264,9 @@
       </div>
       <div id="qContainer"></div>
       <div class="nav-row">
-        <button class="btn btn-nav" id="prevBtn" onclick="prev()">⬅ 上一题</button>
+        <button class="btn btn-nav" id="prevBtn">⬅ 上一题</button>
         <div class="q-dots" id="qDots"></div>
-        <button class="btn btn-nav" id="nextBtn" onclick="next()" disabled>下一题 ➡</button>
+        <button class="btn btn-nav" id="nextBtn" disabled>下一题 ➡</button>
       </div>
     </div>
   </div>
@@ -274,7 +274,7 @@
   <!-- ==================== 结果页 ==================== -->
   <div id="resultPage" class="hidden">
     <div class="result-wrap" id="resultWrap"></div>
-    <button class="btn btn-restart" onclick="restart()">🔄 再测一次！（结果会变吗？）</button>
+    <button class="btn btn-restart" id="btnRestart">🔄 再测一次！（结果会变吗？）</button>
   </div>
 
 </div>
@@ -619,7 +619,7 @@ function renderQContainer() {
       <div class="q-title">${q.text}</div>
       <div class="opts">
         ${q.opts.map((o, oi) => `
-          <button class="opt-btn" id="opt${i}_${oi}" onclick="pick(${i},${oi})">
+          <button class="opt-btn" data-qi="${i}" data-oi="${oi}">
             <span class="opt-emoji">${o.emoji}</span>
             <span>${o.text}</span>
           </button>
@@ -659,6 +659,39 @@ function showQ(i) {
   }
 }
 
+
+// ======== 事件绑定（兼容微信浏览器）========
+document.addEventListener('DOMContentLoaded', function() {
+  var btnStart = document.getElementById('btnStart');
+  if (btnStart) btnStart.addEventListener('click', start);
+
+  var prevBtn = document.getElementById('prevBtn');
+  if (prevBtn) prevBtn.addEventListener('click', prev);
+
+  var nextBtn = document.getElementById('nextBtn');
+  if (nextBtn) nextBtn.addEventListener('click', function() {
+    if (answers[curQ] === null) return;
+    if (curQ === questions.length - 1) { calcResult(); return; }
+    curQ++; showQ(curQ);
+  });
+
+  var btnRestart = document.getElementById('btnRestart');
+  if (btnRestart) btnRestart.addEventListener('click', restart);
+
+  // 选项按钮用事件委托
+  var qContainer = document.getElementById('qContainer');
+  if (qContainer) {
+    qContainer.addEventListener('click', function(e) {
+      var btn = e.target.closest('.opt-btn');
+      if (!btn) return;
+      var qi = parseInt(btn.getAttribute('data-qi'));
+      var oi = parseInt(btn.getAttribute('data-oi'));
+      if (!isNaN(qi) && !isNaN(oi)) pick(qi, oi);
+    });
+  }
+});
+
+// ======== 键盘导航 ========
 function pick(qi, oi) {
   answers[qi] = oi;
   questions[qi].opts.forEach((_, oi2) => {
@@ -826,8 +859,7 @@ function restart() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 键盘导航
-document.addEventListener('keydown', e => {
+// 键盘导航（已由上方事件绑定处理）
   if (document.getElementById('testPage').classList.contains('hidden')) return;
   if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') prev();
   if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { if (answers[curQ] !== null) next(); }
