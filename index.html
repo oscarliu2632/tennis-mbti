@@ -661,7 +661,7 @@ function showQ(i) {
 
 
 // ======== 事件绑定（兼容微信浏览器）========
-document.addEventListener('DOMContentLoaded', function() {
+(function bindEvents() {
   var btnStart = document.getElementById('btnStart');
   if (btnStart) btnStart.addEventListener('click', start);
 
@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!isNaN(qi) && !isNaN(oi)) pick(qi, oi);
     });
   }
-});
+})();
 
 // ======== 键盘导航 ========
 function pick(qi, oi) {
